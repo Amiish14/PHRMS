@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Part Time Payslip{% endblock %}
+{% block page_title %}Payslip — Part Time{% endblock %}
+{% block content %}
+<div class="page-tabs">
+  <a href="{{ url_for("npr.index") }}" class="page-tab">Employees</a>
+  <a href="{{ url_for("npr.attendance") }}" class="page-tab">Attendance</a>
+  <a href="{{ url_for("npr.payslip") }}" class="page-tab active">Payslip</a>
+</div>
+<div class="table-toolbar" style="background:#fff;border-radius:var(--r);border:1px solid var(--g200);margin-bottom:16px">
+  <form method="GET" style="display:flex;gap:8px">
+    <select class="filter-sel" name="month">{% for m in range(1,13) %}<option value="{{ m }}" {{ "selected" if m==month }}>{{ ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m] }}</option>{% endfor %}</select>
+    <select class="filter-sel" name="year">{% for y in range(2014,2027) %}<option value="{{ y }}" {{ "selected" if y==year }}>{{ y }}</option>{% endfor %}</select>
+    <button type="submit" class="btn btn-primary btn-sm">View</button>
+  </form>
+</div>
+<div class="card">
+  <table class="dt"><thead><tr><th>Employee</th><th>Days Present</th><th>Daily Rate</th><th>Total Salary</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+      <div><div class="emp-name">{{ r.empname }}</div><div class="emp-id">{{ r.employeenumber }}</div></div></div></td>
+      <td class="mono">{{ r.days_present }}</td>
+      <td class="mono">₹{{ "{:,.0f}".format(r.parttimeempsalary or 0) }}</td>
+      <td class="mono" style="font-weight:600;color:var(--green)">₹{{ "{:,.0f}".format(r.total_salary or 0) }}</td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No data</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

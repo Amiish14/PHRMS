@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+  {% set reports = [
+    ("Attendance Report","📅","View daily/monthly attendance","reports.attendance_report","btn-primary"),
+    ("Salary Payment","💰","Monthly salary payment register","reports.salary_payment","btn-primary"),
+    ("Bonus Payment","🎁","Annual bonus payment report","reports.bonus_payment","btn-primary"),
+    ("PF Challan","📋","PF challan for statutory filing","reports.pf_challan","btn-primary"),
+    ("Employee Consolidated","📊","Full employee report","reports.employee_consolidated","btn-primary"),
+  ] %}
+  {% for title,icon,desc,ep,cls in reports %}
+  <a href="{{ url_for(ep) }}" style="text-decoration:none">
+    <div class="card" style="cursor:pointer;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div class="card-body" style="text-align:center;padding:24px">
+        <div style="font-size:32px;margin-bottom:8px">{{ icon }}</div>
+        <div style="font-weight:600;color:var(--navy);margin-bottom:4px">{{ title }}</div>
+        <div style="font-size:12px;color:var(--g500)">{{ desc }}</div>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>{% endblock %}

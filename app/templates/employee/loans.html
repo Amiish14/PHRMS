@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}My Loans{% endblock %}
+{% block page_title %}My Loans & Advances{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Type</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody>{% for l in loans %}
+    <tr><td>{{ l.loanpurpose or 'Loan' }}</td>
+      <td class="mono">₹{{ '{:,.0f}'.format(l.loanamount) if l.loanamount else '—' }}</td>
+      <td class="mono" style="font-size:12px">{{ l.createddatetime.strftime('%d %b %Y') if l.createddatetime else '—' }}</td>
+      <td><span class="badge bg-green">Active</span></td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No loans on record</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

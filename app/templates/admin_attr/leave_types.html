@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Leave Types{% endblock %}
+{% block page_title %}Leave Types{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>ID</th><th>Type Name</th><th>Colour</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td class="mono" style="font-size:11px;color:var(--g400)">{{ r.typeid }}</td>
+      <td>{{ r.typename }}</td>
+      <td><span style="background:{{ r.typecolor or "#999" }};color:#fff;padding:2px 8px;border-radius:4px;font-size:11px">{{ r.typecolor or "—" }}</span></td>
+      <td><span class="badge bg-green">Active</span></td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No leave types</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

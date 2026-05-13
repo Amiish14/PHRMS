@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block page_title %}Good {{ 'morning' if now.hour < 12 else ('afternoon' if now.hour < 17 else 'evening') }}, {{ current_user.firstname }}{% endblock %}
+{% block page_subtitle %}<span class="tb-sub">{{ now.strftime('%A, %d %B %Y') }}</span>{% endblock %}
+
+{% block topbar_actions %}
+{% if current_user.mobileattendanceflag %}
+<button class="btn btn-sm btn-gold" onclick="openModal('checkinModal')">📱 Check In</button>
+{% endif %}
+<button class="btn btn-sm btn-ghost" onclick="openModal('leaveModal')">Apply Leave</button>
+{% endblock %}
+
+{% block content %}
+{% set now = __import__('datetime').date.today() %}
+
+<!-- ATTENDANCE QUICK CARDS -->
+<div class="kpi-grid">
+  {% for s in att_summary %}
+  <div class="kpi-card {{ 'kpi-green' if 'Present' in s.typename else ('kpi-amber' if 'Leave' in s.typename else ('kpi-red' if 'Absent' in s.typename else 'kpi-blue')) }}">
+    <div class="kpi-label">{{ s.typename }}</div>
+    <div class="kpi-value">{{ s.cnt }}</div>
+    <div class="kpi-note">days in {{ now.strftime('%Y') }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- MOBILE CHECK-IN (if enabled) -->
+{% if current_user.mobileattendanceflag %}
+<div class="mobile-checkin-card" id="checkin-hero">
+  <h2>Mark Your Attendance</h2>
+  <p>GPS-verified check-in for today, {{ now.strftime('%d %B %Y') }}</p>
+  <button class="checkin-btn" onclick="doMobileCheckin()" id="checkin-btn">📍 Check In Now</button>
+  <div class="location-info" id="location-info">Fetching your location…</div>
+</div>
+{% endif %}
+
+<div class="two-col col-3-2">
+
+  <!-- LEFT -->
+  <div>
+    <!-- This Month Attendance Calendar -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📅 {{ now.strftime('%B %Y') }} — Attendance</div>
+        <a href="{{ url_for('employee.my_attendance') }}" class="btn btn-sm btn-ghost">Full history</a>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:11px">
+          <span style="background:var(--gbg);color:var(--green);padding:2px 7px;border-radius:3px">Present</span>
+          <span style="background:var(--rbg);color:var(--red);padding:2px 7px;border-radius:3px">Absent</span>
+          <span style="background:var(--bbg);color:var(--blue);padding:2px 7px;border-radius:3px">Leave</span>
+          <span style="background:var(--g100);color:var(--g500);padding:2px 7px;border-radius:3px">Holiday</span>
+        </div>
+
+        {% set att_by_date = {} %}
+        {% for a in attendance %}
+          {% set _ = att_by_date.update({a.attendancedate.day: a}) %}
+        {% endfor %}
+
+        {% import 'calendar_macro.html' as cal_m ignore missing %}
+
+        <div class="att-grid">
+          {% for dh in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+          <div class="att-day-hdr">{{ dh }}</div>
+          {% endfor %}
+
+          {% set first_day = now.replace(day=1) %}
+          {% set first_weekday = first_day.weekday() %}
+          {% for _ in range(first_weekday) %}
+          <div></div>
+          {% endfor %}
+
+          {% set import_calendar = __import__('calendar') %}
+          {% set days_in_month = import_calendar.monthrange(now.year, now.month)[1] %}
+
+          {% for day in range(1, days_in_month + 1) %}
+          {% set a = att_by_date.get(day) %}
+          {% set is_today = day == now.day %}
+          {% if a %}
+            {% set bg = 'background:' + (a.typecolour if a.typecolour and a.typecolour.startswith('#') else ('var(--gbg)' if 'Present' in (a.atttype or '') else ('var(--bbg)' if 'Leave' in (a.atttype or '') else 'var(--rbg)')  )) %}
+            {% set fg = 'color:' + ('var(--green)' if 'Present' in (a.atttype or '') else ('var(--blue)' if 'Leave' in (a.atttype or '') else 'var(--red)')) %}
+          <div class="att-cell {{ 'att-today' if is_today }} {{ 'att-mobile' if a.ismobile }}"
+               style="{{ bg }};{{ fg }}"
+               title="{{ a.atttype }}{{ ' — ' + a.leavetype if a.leavetype else '' }}{{ ' (Mobile)' if a.ismobile }}">{{ day }}</div>
+          {% else %}
+          <div class="att-cell {{ 'att-today' if is_today }}"
+               style="{% if day > now.day %}color:var(--g300){% else %}color:var(--g500){% endif %}">{{ day }}</div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- My Recent Leave Requests -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏖️ Recent Leave Requests</div>
+        <a href="{{ url_for('employee.my_leave') }}" class="btn btn-sm btn-ghost">All leave</a>
+      </div>
+      {% if my_leaves %}
+      <table class="dt">
+        <thead><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for lr in my_leaves %}
+          <tr>
+            <td>{{ lr.leavetype }}</td>
+            <td class="mono" style="font-size:12px">{{ lr.startdate.strftime('%d %b %Y') if lr.startdate else '—' }}</td>
+            <td class="mono" style="font-size:12px">{{ lr.enddate.strftime('%d %b %Y') if lr.enddate else '—' }}</td>
+            <td class="mono">{{ lr.noofdays|int }}</td>
+            <td>
+              {% if lr.employeeleaveflag == 1 %}<span class="badge bg-green">Approved</span>
+              {% elif lr.employeeleaveflag == 2 %}<span class="badge bg-red">Rejected</span>
+              {% else %}<span class="badge bg-amber">Pending</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="card-body" style="text-align:center;color:var(--g400)">No leave requests</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div>
+
+    <!-- Leave Balance -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📊 Leave Balance {{ now.year }}</div>
+        <button class="btn btn-sm btn-ghost" onclick="openModal('leaveModal')">+ Apply</button>
+      </div>
+      <div class="card-body" style="padding:10px 18px">
+        {% for lb in leave_balance %}
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:13px;font-weight:500;color:var(--navy)">{{ lb.typename }}</span>
+            <span class="mono" style="font-size:13px;color:var(--g700)">{{ lb.available|int }}/{{ lb.allotted }}</span>
+          </div>
+          <div class="lb-bar">
+            <div class="lb-fill" style="width:{{ ((lb.available/lb.allotted)*100)|round if lb.allotted else 0 }}%;background:{{ lb.typecolor or 'var(--navy)' }}"></div>
+          </div>
+          {% if lb.pending > 0 %}
+          <div style="font-size:11px;color:var(--amber);margin-top:2px">{{ lb.pending|int }} days pending</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- My Loans -->
+    {% if my_loans %}
+    <div class="card">
+      <div class="card-header"><div class="card-title">💰 My Loans</div></div>
+      <div class="card-body" style="padding:10px 18px">
+        {% for loan in my_loans %}
+        <div class="payslip-row">
+          <span>{{ loan.loantype or 'Loan' }}</span>
+          <span class="payslip-amt">₹{{ '{:,.0f}'.format(loan.loanamount) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Payments -->
+    {% if my_claims %}
+    <div class="card">
+      <div class="card-header"><div class="card-title">💸 Recent Payments</div>
+        <a href="{{ url_for('employee.my_claims') }}" class="btn btn-sm btn-ghost">All</a>
+      </div>
+      <div class="card-body" style="padding:10px 18px">
+        {% for cp in my_claims %}
+        <div class="payslip-row">
+          <span style="font-size:12px">{{ cp.payment_desc or 'Payment' }} <span class="text-muted">· {{ cp.paymentdate.strftime('%d %b %Y') if cp.paymentdate else '' }}</span></span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Apply Leave Modal -->
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Apply for Leave</div>
+      <button class="modal-close" onclick="closeModal('leaveModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="{{ url_for('employee.apply_leave') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Leave Type <span class="req">*</span></label>
+            <select class="form-select" name="leavetypeid" required>
+              <option value="">Select leave type…</option>
+              {% for lt in leave_types %}
+              <option value="{{ lt.typeid }}">{{ lt.typename }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">From Date <span class="req">*</span></label>
+            <input type="date" class="form-input" name="startdate" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">To Date <span class="req">*</span></label>
+            <input type="date" class="form-input" name="enddate" required>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Reason <span class="req">*</span></label>
+            <textarea class="form-textarea" name="reason" required placeholder="Reason for leave…"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Contact During Leave</label>
+            <input type="text" class="form-input" name="contact_details" placeholder="Mobile / alternate contact">
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:14px 0 0">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('leaveModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Check-in Modal -->
+<div class="modal-overlay" id="checkinModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📍 Mobile Check-In</div>
+      <button class="modal-close" onclick="closeModal('checkinModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="checkin-status" style="text-align:center;padding:16px 0;color:var(--g600);font-size:14px">
+        Getting your location…
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <label class="form-label">Reason / Notes (optional)</label>
+        <input type="text" class="form-input" id="checkin-reason" placeholder="e.g. Working from site">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('checkinModal')">Cancel</button>
+      <button class="btn btn-gold" onclick="submitCheckin()" id="submit-checkin-btn" disabled>📍 Confirm Check-In</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+{% set leave_types = leave_balance %}
+{% endblock %}
+
+{% block page_script %}
+let userLat = '', userLng = '', userAddress = '';
+
+function getLocation() {
+  if (!navigator.geolocation) {
+    document.getElementById('checkin-status').textContent = 'Geolocation not supported on this device.';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    userLat = pos.coords.latitude.toFixed(6);
+    userLng = pos.coords.longitude.toFixed(6);
+    userAddress = userLat + ', ' + userLng;
+    document.getElementById('checkin-status').innerHTML =
+      '✅ Location detected<br><small style="color:var(--g500)">' + userAddress + '</small>';
+    document.getElementById('submit-checkin-btn').disabled = false;
+    // Reverse geocode using nominatim
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + userLat + '&lon=' + userLng)
+      .then(r => r.json()).then(d => {
+        userAddress = d.display_name || userAddress;
+        document.getElementById('checkin-status').innerHTML =
+          '✅ Location detected<br><small style="color:var(--g500)">' + (d.display_name ? d.display_name.substring(0,80)+'…' : userAddress) + '</small>';
+      }).catch(() => {});
+  }, function(err) {
+    document.getElementById('checkin-status').textContent = '⚠️ Could not get location: ' + err.message;
+    document.getElementById('submit-checkin-btn').disabled = false;
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+function doMobileCheckin() {
+  openModal('checkinModal');
+  getLocation();
+}
+
+function submitCheckin() {
+  const btn = document.getElementById('submit-checkin-btn');
+  btn.disabled = true;
+  btn.textContent = 'Checking in…';
+  const reason = document.getElementById('checkin-reason').value || 'Mobile check-in';
+
+  fetch('/api/attendance/checkin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+    body: JSON.stringify({ lat: userLat, lng: userLng, address: userAddress, reason: reason })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.status === 'ok') {
+      document.getElementById('checkin-status').innerHTML = '✅ <strong>Checked in successfully!</strong><br><small>' + d.date + '</small>';
+      btn.textContent = '✓ Done';
+      setTimeout(() => { closeModal('checkinModal'); location.reload(); }, 1500);
+    } else {
+      document.getElementById('checkin-status').textContent = '❌ ' + (d.message || 'Error checking in');
+      btn.disabled = false; btn.textContent = 'Retry';
+    }
+  })
+  .catch(() => {
+    document.getElementById('checkin-status').textContent = '❌ Network error. Try again.';
+    btn.disabled = false; btn.textContent = 'Retry';
+  });
+}
+{% endblock %}

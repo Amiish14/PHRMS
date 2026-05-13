@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ emp.empname }}{% endblock %}
+{% block page_title %}{{ emp.empname }}{% endblock %}
+{% block content %}
+<div class="profile-hero">
+  <div class="ph-avatar">{{ emp.empname[:2].upper() if emp.empname else '??' }}</div>
+  <div class="ph-info">
+    <div class="ph-name">{{ emp.empname }}</div>
+    <div class="ph-desig">{{ emp.designation or '' }} {% if emp.departmentname %}· {{ emp.departmentname }}{% endif %}</div>
+    <div class="ph-meta">
+      <div class="ph-meta-item"><strong>{{ emp.employeenumber }}</strong>Employee ID</div>
+      <div class="ph-meta-item"><strong>{{ emp.doj.strftime('%d %b %Y') if emp.doj else '—' }}</strong>Joined</div>
+      <div class="ph-meta-item"><strong>{{ emp.grade or '—' }}</strong>Grade</div>
+    </div>
+  </div>
+</div>
+<div class="two-col">
+  <div class="card"><div class="card-header"><div class="card-title">Leave Balance</div></div>
+    <div class="card-body">{% for lb in leave_balance %}
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+          <span style="font-weight:500">{{ lb.typename }}</span>
+          <span class="mono">{{ lb.available|int }}/{{ lb.allotted }}</span>
+        </div>
+        <div class="lb-bar"><div class="lb-fill" style="width:{{ ((lb.available/lb.allotted)*100)|round if lb.allotted else 0 }}%;background:{{ lb.typecolor or 'var(--navy)' }}"></div></div>
+      </div>{% endfor %}
+    </div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">{{ month_name }} {{ year }} Attendance</div></div>
+    <div class="card-body">
+      <div class="att-grid">
+        {% for dh in ['M','T','W','T','F','S','S'] %}<div class="att-day-hdr">{{ dh }}</div>{% endfor %}
+        {% set first_day = __import__('datetime').date(year,month,1) %}
+        {% for _ in range(first_day.weekday()) %}<div></div>{% endfor %}
+        {% set att_by_date = {} %}{% for a in attendance %}{% set _ = att_by_date.update({a.attendancedate.day: a}) %}{% endfor %}
+        {% for day in range(1, 32) %}{% if day <= 31 %}{% set a = att_by_date.get(day) %}
+        {% if a %}<div class="att-cell" style="background:{{ a.typecolour or '#eee' }}20;color:{{ a.typecolour or '#666' }}" title="{{ a.atttype }}">{{ day }}</div>
+        {% else %}<div class="att-cell" style="color:var(--g300)">{{ day }}</div>{% endif %}{% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block page_script %}
+const month_name = '{{ __import__('datetime').date(year,month,1).strftime('%B') }}';
+{% endblock %}

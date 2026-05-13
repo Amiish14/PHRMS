@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Payroll{% endblock %}
+{% block page_title %}Payroll & Claims{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Employee</th><th>Date</th><th>Remarks</th></tr></thead>
+  <tbody>{% for cv in result.rows %}<tr>
+    <td>{{ cv.empname }}</td>
+    <td class="mono" style="font-size:12px">{{ cv.createddatetime.strftime('%d %b %Y') if cv.createddatetime else '—' }}</td>
+    <td style="font-size:12px">{{ cv.remarks or '—' }}</td>
+  </tr>{% else %}<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--g400)">No records</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

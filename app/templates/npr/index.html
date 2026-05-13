@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}NPR Employees{% endblock %}
+{% block page_title %}NPR — Part Time Employees{% endblock %}
+{% block content %}
+<div class="page-tabs">
+  <a href="{{ url_for("npr.index") }}" class="page-tab active">Employees</a>
+  <a href="{{ url_for("npr.attendance") }}" class="page-tab">Attendance</a>
+  <a href="{{ url_for("npr.payslip") }}" class="page-tab">Payslip</a>
+</div>
+<div class="card">
+  <table class="dt"><thead><tr><th>Employee</th><th>Type</th><th>Department</th><th>Daily Rate</th></tr></thead>
+  <tbody>{% for e in employees %}
+    <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ e.empname[:2].upper() }}</div>
+      <div><div class="emp-name">{{ e.empname }}</div><div class="emp-id">{{ e.employeenumber }}</div></div></div></td>
+      <td><span class="badge bg-amber">{{ e.emptype }}</span></td>
+      <td>{{ e.departmentname or "—" }}</td>
+      <td class="mono">₹{{ "{:,.0f}".format(e.parttimeempsalary or 0) }}</td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No part-time employees</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

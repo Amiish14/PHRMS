@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Travel Desk{% endblock %}
+{% block page_title %}Travel Desk{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Request #</th><th>Employee</th><th>Purpose</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}<tr>
+    <td class="mono">TR-{{ r.travelrequestid }}</td>
+    <td>{{ r.requester_name }}</td>
+    <td style="font-size:12px">{{ r.purposeofvisit[:60] if r.purposeofvisit else '—' }}</td>
+    <td>{% if r.travelrequestflag==1 %}<span class="badge bg-green">Approved</span>
+        {% elif r.travelrequestflag==2 %}<span class="badge bg-red">Rejected</span>
+        {% else %}<span class="badge bg-amber">Pending</span>{% endif %}</td>
+  </tr>{% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No travel requests</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

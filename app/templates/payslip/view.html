@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Payslip — {{ emp.empname }}{% endblock %}
+{% block page_title %}Payslip{% endblock %}
+{% block page_subtitle %}<span class="tb-sub">{{ emp.empname }} · {{ ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month] }} {{ year }}</span>{% endblock %}
+{% block topbar_actions %}<button onclick="window.print()" class="btn btn-ghost btn-sm">🖨 Print</button>{% endblock %}
+{% block content %}
+<div style="max-width:680px;margin:0 auto">
+  <div class="card">
+    <div style="background:var(--navy);padding:22px 24px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="color:#fff;font-size:18px;font-weight:700;letter-spacing:-.3px">PROCAM GROUP</div>
+        <div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">Payslip for {{ ["","January","February","March","April","May","June","July","August","September","October","November","December"][month] }} {{ year }}</div>
+      </div>
+      <div style="background:var(--gold);color:var(--navy);padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700">PAYSLIP</div>
+    </div>
+    <div class="card-body">
+      <div class="two-col" style="margin-bottom:18px">
+        <div>
+          <div style="font-size:11px;color:var(--g500);margin-bottom:2px">Employee</div>
+          <div style="font-weight:600;color:var(--navy)">{{ emp.empname }}</div>
+          <div style="font-size:12px;color:var(--g500);font-family:var(--m)">{{ emp.employeenumber }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--g500);margin-bottom:2px">Department</div>
+          <div style="font-weight:500">{{ emp.departmentname or "—" }}</div>
+          <div style="font-size:12px;color:var(--g500)">{{ emp.designation or "—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--g500);margin-bottom:2px">Grade</div>
+          <div style="font-weight:500">{{ emp.grade or "—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--g500);margin-bottom:2px">Date of Joining</div>
+          <div style="font-weight:500">{{ emp.doj.strftime("%d %b %Y") if emp.doj else "—" }}</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      {% if salary_structure %}
+      <div class="two-col">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Earnings</div>
+          {% for s in salary_structure if s.salarycomponenttype == "earning" %}
+          <div class="payslip-row"><span>{{ s.typename }}</span><span class="payslip-amt">₹{{ "{:,.0f}".format(s.amount or 0) }}</span></div>
+          {% endfor %}
+          <div class="payslip-row total"><span>Gross Earnings</span><span class="payslip-amt">₹{{ "{:,.0f}".format(salary_structure|selectattr("salarycomponenttype","eq","earning")|sum(attribute="amount") or 0) }}</span></div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Deductions</div>
+          {% for s in salary_structure if s.salarycomponenttype == "deduction" %}
+          <div class="payslip-row deduct"><span>{{ s.typename }}</span><span class="payslip-amt">₹{{ "{:,.0f}".format(s.amount or 0) }}</span></div>
+          {% endfor %}
+          <div class="payslip-row total" style="color:var(--red)"><span>Total Deductions</span><span class="payslip-amt">₹{{ "{:,.0f}".format(salary_structure|selectattr("salarycomponenttype","eq","deduction")|sum(attribute="amount") or 0) }}</span></div>
+        </div>
+      </div>
+      <div style="background:var(--navy);color:#fff;border-radius:8px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+        <span style="font-weight:600">Net Pay</span>
+        <span style="font-size:20px;font-weight:700;font-family:var(--m)">₹{{ "{:,.0f}".format((salary_structure|selectattr("salarycomponenttype","eq","earning")|sum(attribute="amount") or 0) - (salary_structure|selectattr("salarycomponenttype","eq","deduction")|sum(attribute="amount") or 0)) }}</span>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:30px;color:var(--g400)">No salary structure configured for this employee</div>
+      {% endif %}
+      {% if payments %}
+      <div style="margin-top:18px">
+        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:8px">Payment Records This Month</div>
+        {% for p in payments %}
+        <div class="payslip-row"><span>{{ p.pay_desc or "Payment" }}</span><span class="payslip-amt mono">₹{{ "{:,.0f}".format(p.amount or 0) }}</span></div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    <div style="padding:12px 18px;background:var(--g50);border-top:1px solid var(--g100);font-size:11px;color:var(--g400);text-align:center">
+      This is a computer generated payslip. No signature required.
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+    <a href="?month={{ month-1 if month > 1 else 12 }}&year={{ year if month > 1 else year-1 }}" class="btn btn-ghost btn-sm">← Prev Month</a>
+    <a href="{{ url_for("payslip.index") }}" class="btn btn-ghost btn-sm">All Employees</a>
+    <a href="?month={{ month+1 if month < 12 else 1 }}&year={{ year if month < 12 else year+1 }}" class="btn btn-ghost btn-sm">Next Month →</a>
+  </div>
+</div>{% endblock %}

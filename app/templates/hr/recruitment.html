@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Recruitment{% endblock %}
+{% block page_title %}Recruitment{% endblock %}
+{% block content %}
+<div class="card"><div class="card-header"><div class="card-title">Requisitions</div></div>
+  <table class="dt"><thead><tr><th>Position</th><th>Department</th><th>Requested By</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody>{% for r in result.rows %}
+    <tr><td style="font-weight:500">{{ r.recruitmenttype or 'Position' }}</td>
+      <td>{{ r.departmentname or '—' }}</td><td>{{ r.reqby_name }}</td>
+      <td class="mono" style="font-size:12px">{{ r.createddatetime.strftime('%d %b %Y') if r.createddatetime else '—' }}</td>
+      <td><span class="badge bg-amber">Open</span></td>
+    </tr>
+  {% else %}<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--g400)">No requisitions</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

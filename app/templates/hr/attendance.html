@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance Today{% endblock %}
+{% block content %}
+<div class="kpi-grid">
+  <div class="kpi-card kpi-green"><div class="kpi-label">Present</div><div class="kpi-value">{{ stats.present_today }}</div></div>
+  <div class="kpi-card kpi-amber"><div class="kpi-label">On Leave</div><div class="kpi-value">{{ stats.on_leave_today }}</div></div>
+  <div class="kpi-card kpi-blue"><div class="kpi-label">Mobile</div><div class="kpi-value">{{ stats.mobile_checkins_today }}</div></div>
+  <div class="kpi-card kpi-red"><div class="kpi-label">Pending Regs</div><div class="kpi-value">{{ stats.pending_attendance_reg }}</div></div>
+</div>
+<div class="card"><div class="card-header"><div class="card-title">Today's Records</div></div>
+  <table class="dt"><thead><tr><th>Employee</th><th>Dept</th><th>Status</th><th>Mobile</th><th>Location</th></tr></thead>
+  <tbody>{% for r in records %}
+    <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+      <div><div class="emp-name">{{ r.empname }}</div><div class="emp-id">{{ r.employeenumber }}</div></div></div></td>
+      <td>{{ r.departmentname or '—' }}</td>
+      <td><span class="badge" style="background:{{ r.typecolour or '#eee' }}20;color:{{ r.typecolour or '#888' }}">{{ r.atttype }}</span></td>
+      <td>{% if r.ismobile %}<span class="badge bg-blue">📱</span>{% else %}—{% endif %}</td>
+      <td style="font-size:11px;color:var(--g500);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.address[:60] if r.address else '—' }}</td>
+    </tr>
+  {% else %}<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--g400)">No records yet today</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

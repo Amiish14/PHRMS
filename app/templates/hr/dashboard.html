@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}HR Dashboard{% endblock %}
+{% block page_title %}HR Dashboard{% endblock %}
+{% block page_subtitle %}<span class="tb-sub">{{ today.strftime('%A, %d %B %Y') }}</span>{% endblock %}
+
+{% block content %}
+<div class="kpi-grid">
+  <div class="kpi-card kpi-navy">
+    <div class="kpi-icon">👥</div>
+    <div class="kpi-label">Active Employees</div>
+    <div class="kpi-value">{{ stats.total_employees }}</div>
+    <div class="kpi-note up">{{ stats.new_joiners_month }} joined this month</div>
+  </div>
+  <div class="kpi-card kpi-green">
+    <div class="kpi-icon">✅</div>
+    <div class="kpi-label">Present Today</div>
+    <div class="kpi-value">{{ stats.present_today }}</div>
+    <div class="kpi-note">{{ stats.mobile_checkins_today }} via mobile</div>
+  </div>
+  <div class="kpi-card kpi-amber">
+    <div class="kpi-icon">⏳</div>
+    <div class="kpi-label">Pending Leave</div>
+    <div class="kpi-value">{{ stats.pending_leave_approvals }}</div>
+    <div class="kpi-note">needs your approval</div>
+  </div>
+  <div class="kpi-card kpi-red">
+    <div class="kpi-icon">🔴</div>
+    <div class="kpi-label">Open Grievances</div>
+    <div class="kpi-value">{{ stats.pending_grievances }}</div>
+    <div class="kpi-note">{{ stats.pending_attendance_reg }} attendance regs</div>
+  </div>
+</div>
+
+<div class="two-col col-2-1">
+  <div>
+    <!-- Pending Leave Approvals -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⏳ Leave Approvals Pending</div>
+        <a href="{{ url_for('hr.leave_management') }}" class="btn btn-sm btn-ghost">View all</a>
+      </div>
+      {% if pending_leaves.rows %}
+      <table class="dt">
+        <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>Days</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for lr in pending_leaves.rows %}
+          <tr>
+            <td><div class="emp-cell">
+              <div class="emp-av" style="font-size:10px">{{ lr.empname[:2].upper() }}</div>
+              <div><div class="emp-name">{{ lr.empname }}</div><div class="emp-id">{{ lr.employeenumber }}</div></div>
+            </div></td>
+            <td>{{ lr.leavetype }}</td>
+            <td class="mono" style="font-size:12px">{{ lr.startdate.strftime('%d %b') if lr.startdate else '—' }}</td>
+            <td class="mono">{{ lr.noofdays|int }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('hr.approve_leave', lrid=lr.leaverequestid) }}" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">✓</button>
+                <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">✗</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="card-body" style="text-align:center;color:var(--g400)">No pending leave requests 🎉</div>
+      {% endif %}
+    </div>
+
+    <!-- Mobile Check-ins -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">📱 Mobile Check-ins Today</div><span class="badge bg-blue">{{ stats.mobile_checkins_today }}</span></div>
+      {% if mobile_checkins %}
+      <table class="dt">
+        <thead><tr><th>Employee</th><th>Time</th><th>Location</th></tr></thead>
+        <tbody>
+          {% for m in mobile_checkins[:6] %}
+          <tr>
+            <td><div class="emp-cell">
+              <div class="emp-av" style="font-size:10px">{{ m.empname[:2].upper() }}</div>
+              <div><div class="emp-name">{{ m.empname }}</div><div class="emp-id">{{ m.employeenumber }}</div></div>
+            </div></td>
+            <td class="mono" style="font-size:12px">{{ m.createddatetime.strftime('%H:%M') if m.createddatetime else '—' }}</td>
+            <td style="font-size:11px;color:var(--g500);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.address[:60] if m.address else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="card-body" style="text-align:center;color:var(--g400)">No mobile check-ins today</div>
+      {% endif %}
+    </div>
+
+    <!-- Attendance Regulation Requests -->
+    {% if reg_requests %}
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔁 Attendance Regulation Requests</div></div>
+      <table class="dt">
+        <thead><tr><th>Employee</th><th>Dates</th><th>Type</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for r in reg_requests[:5] %}
+          <tr>
+            <td>{{ r.empname }}</td>
+            <td class="mono" style="font-size:12px">{{ r.startdate.strftime('%d %b') if r.startdate else '—' }} – {{ r.enddate.strftime('%d %b') if r.enddate else '—' }}</td>
+            <td>{{ r.atttype }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('attendance.regulation_action', reqid=r.attendanceregulationrequestid) }}" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">✓</button>
+                <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">✗</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <!-- Headcount by Vertical -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">👥 Headcount</div></div>
+      <div class="card-body">
+        {% for v in verticals %}
+        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid var(--g100)">
+          <span style="font-weight:500;color:var(--navy)">{{ v.vertical }}</span>
+          <span class="mono badge bg-navy">{{ v.cnt }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Birthdays -->
+    {% if birthdays %}
+    <div class="card">
+      <div class="card-header"><div class="card-title">🎂 Birthdays This Week</div></div>
+      <div class="card-body" style="padding:8px 18px">
+        {% for b in birthdays %}
+        <div style="display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--g100)">
+          <div class="emp-av" style="background:var(--gold);color:var(--navy);font-size:10px">{{ b.empname[:2].upper() }}</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">{{ b.empname }}</div><div style="font-size:11px;color:var(--g500)">{{ b.departmentname or '' }}</div></div>
+          <span class="badge bg-amber">{{ (b.celebratedob or b.dob).strftime('%d %b') if (b.celebratedob or b.dob) else '' }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Joiners -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">🆕 Recent Joiners</div></div>
+      <div class="card-body" style="padding:8px 18px">
+        {% for e in recent_joiners %}
+        <div style="display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--g100)">
+          <div class="emp-av" style="font-size:10px">{{ e.empname[:2].upper() }}</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">{{ e.empname }}</div><div style="font-size:11px;color:var(--g500)">{{ e.designation or '' }}</div></div>
+          <span class="mono" style="font-size:11px;color:var(--g500)">{{ e.doj.strftime('%d %b') if e.doj else '' }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}My Claims{% endblock %}
+{% block page_title %}My Claims & Payments{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Payment #</th><th>Date</th><th>Paid By</th><th>Description</th></tr></thead>
+  <tbody>{% for cp in result.rows %}
+    <tr><td class="mono">{{ cp.claimpaymentnumber }}</td>
+      <td class="mono" style="font-size:12px">{{ cp.paymentdate.strftime('%d %b %Y') if cp.paymentdate else '—' }}</td>
+      <td>{{ cp.paidby_name }}</td>
+      <td>{{ cp.remarks or '—' }}</td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No payment records</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

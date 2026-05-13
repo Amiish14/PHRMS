@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Holidays{% endblock %}
+{% block page_title %}Holiday List{% endblock %}
+{% block page_subtitle %}<span class="tb-sub">{{ year }}</span>{% endblock %}
+{% block content %}
+<div class="page-tabs">
+  {% for y in years %}<a href="?year={{ y }}" class="page-tab {{ "active" if y==year }}">{{ y }}</a>{% endfor %}
+</div>
+<div class="card">
+  <table class="dt"><thead><tr><th>Date</th><th>Day</th><th>Holiday</th><th>Type</th></tr></thead>
+  <tbody>{% for h in rows %}
+    <tr><td class="mono">{{ h.holidaydate.strftime("%d %b %Y") if h.holidaydate else "—" }}</td>
+      <td>{{ h.holidaydate.strftime("%A") if h.holidaydate else "—" }}</td>
+      <td style="font-weight:500">{{ h.reason }}</td>
+      <td>{% if h.isoptional %}<span class="badge bg-amber">Optional</span>{% else %}<span class="badge bg-blue">Mandatory</span>{% endif %}</td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No holidays for {{ year }}</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

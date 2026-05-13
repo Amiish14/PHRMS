@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt">
+    <thead><tr><th>#</th>{% for c in cols %}<th>{{ c|replace("_"," ")|title }}</th>{% endfor %}<th>Status</th></tr></thead>
+    <tbody>{% for r in rows %}
+      <tr><td class="mono" style="color:var(--g400);font-size:11px">{{ loop.index }}</td>
+        {% for c in cols %}<td>{{ r.get(c,"—") or "—" }}</td>{% endfor %}
+        <td><span class="badge bg-green">Active</span></td>
+      </tr>
+    {% else %}<tr><td colspan="{{ cols|length + 2 }}" style="text-align:center;padding:30px;color:var(--g400)">No records</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>{% endblock %}

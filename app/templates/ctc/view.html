@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}CTC — {{ emp.empname if emp else "" }}{% endblock %}
+{% block page_title %}CTC Details{% endblock %}
+{% block page_subtitle %}<span class="tb-sub">{{ emp.empname if emp }}</span>{% endblock %}
+{% block content %}
+{% if emp %}
+<div class="profile-hero">
+  <div class="ph-avatar">{{ emp.empname[:2].upper() }}</div>
+  <div class="ph-info">
+    <div class="ph-name">{{ emp.empname }}</div>
+    <div class="ph-desig">{{ emp.designation or "" }} · {{ emp.departmentname or "" }}</div>
+    <div class="ph-meta">
+      <div class="ph-meta-item"><strong>{{ emp.employeenumber }}</strong>ID</div>
+      <div class="ph-meta-item"><strong>{{ emp.grade or "—" }}</strong>Grade</div>
+    </div>
+  </div>
+</div>
+{% if salary_structure %}
+<div class="card">
+  <div class="card-header"><div class="card-title">Current CTC Structure</div></div>
+  <div class="card-body">
+    <div class="two-col">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:10px">EARNINGS</div>
+        {% for s in salary_structure if s.salarycomponenttype == "earning" %}
+        <div class="payslip-row"><span>{{ s.typename }}</span><span class="mono">₹{{ "{:,.0f}".format(s.amount or 0) }}/mo</span></div>
+        {% endfor %}
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:10px">DEDUCTIONS</div>
+        {% for s in salary_structure if s.salarycomponenttype == "deduction" %}
+        <div class="payslip-row"><span>{{ s.typename }}</span><span class="mono">₹{{ "{:,.0f}".format(s.amount or 0) }}/mo</span></div>
+        {% endfor %}
+      </div>
+    </div>
+    {% set gross = salary_structure|selectattr("salarycomponenttype","eq","earning")|sum(attribute="amount") or 0 %}
+    {% set deduct = salary_structure|selectattr("salarycomponenttype","eq","deduction")|sum(attribute="amount") or 0 %}
+    <div style="background:var(--g50);border-radius:var(--rs);padding:14px;margin-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div><div style="font-size:11px;color:var(--g500)">Monthly CTC</div><div style="font-size:20px;font-weight:700;color:var(--navy);font-family:var(--m)">₹{{ "{:,.0f}".format(gross) }}</div></div>
+      <div><div style="font-size:11px;color:var(--g500)">Annual CTC</div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:var(--m)">₹{{ "{:,.0f}".format(gross * 12) }}</div></div>
+      <div><div style="font-size:11px;color:var(--g500)">Take Home</div><div style="font-size:20px;font-weight:700;color:var(--green);font-family:var(--m)">₹{{ "{:,.0f}".format(gross - deduct) }}</div></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% if ctc_details %}
+<div class="card">
+  <div class="card-header"><div class="card-title">CTC History</div></div>
+  <table class="dt"><thead><tr><th>Month</th><th>Salary Type</th><th>Amount</th></tr></thead>
+  <tbody>{% for d in ctc_details %}
+    <tr><td class="mono">{{ d.ctcmonth }}</td><td>{{ d.salarytype or "—" }}</td><td class="mono">₹{{ "{:,.0f}".format(d.amount or 0) }}</td></tr>
+  {% endfor %}</tbody></table>
+</div>
+{% endif %}
+{% else %}<div class="card"><div class="card-body" style="text-align:center;padding:30px;color:var(--g400)">Employee not found.</div></div>{% endif %}
+{% endblock %}

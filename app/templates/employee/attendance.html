@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}My Attendance{% endblock %}
+{% block page_title %}My Attendance{% endblock %}
+{% block content %}
+<div class="two-col">
+  <div class="card"><div class="card-header"><div class="card-title">{{ __import__('datetime').date(year,month,1).strftime('%B %Y') }}</div>
+    <div style="display:flex;gap:4px">
+      {% set prev_month = month-1 if month>1 else 12 %}{% set prev_year = year if month>1 else year-1 %}
+      {% set next_month = month+1 if month<12 else 1 %}{% set next_year = year if month<12 else year+1 %}
+      <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-sm btn-ghost">←</a>
+      <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-sm btn-ghost">→</a>
+    </div>
+  </div><div class="card-body">
+    <div class="att-grid">
+      {% for dh in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}<div class="att-day-hdr">{{ dh }}</div>{% endfor %}
+      {% set first_day = __import__('datetime').date(year,month,1) %}
+      {% for _ in range(first_day.weekday()) %}<div></div>{% endfor %}
+      {% set att_map = {} %}{% for a in attendance %}{% set _ = att_map.update({a.attendancedate.day: a}) %}{% endfor %}
+      {% set today = __import__('datetime').date.today() %}
+      {% for day in range(1,32) %}
+        {% if day <= __import__('calendar').monthrange(year,month)[1] %}
+          {% set a = att_map.get(day) %}
+          {% set is_today = (today.year==year and today.month==month and today.day==day) %}
+          {% if a %}
+            <div class="att-cell {{ 'att-today' if is_today }} {{ 'att-mobile' if a.ismobile }}"
+                 style="background:{{ a.typecolour or '#ddd' }}30;color:{{ a.typecolour or '#666' }}"
+                 title="{{ a.atttype }}{{ ' (Mobile)' if a.ismobile }}">{{ day }}</div>
+          {% else %}
+            <div class="att-cell {{ 'att-today' if is_today }}" style="color:var(--g400)">{{ day }}</div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:11px">
+      {% for s in summary %}<span style="background:{{ s.typecolour or '#eee' }}20;color:{{ s.typecolour or '#666' }};padding:2px 8px;border-radius:4px">{{ s.typename }}: {{ s.cnt }}</span>{% endfor %}
+    </div>
+  </div></div>
+  <div>
+    <div class="card"><div class="card-header"><div class="card-title">📱 Mobile Check-in History</div></div>
+      {% if mobile_history %}
+      <table class="dt"><thead><tr><th>Date</th><th>Time</th><th>Location</th></tr></thead>
+      <tbody>{% for m in mobile_history[:10] %}
+        <tr><td class="mono" style="font-size:12px">{{ m.attendancedate.strftime('%d %b %Y') if m.attendancedate else '—' }}</td>
+          <td class="mono" style="font-size:12px">{{ m.createddatetime.strftime('%H:%M') if m.createddatetime else '—' }}</td>
+          <td style="font-size:11px;color:var(--g500);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.address[:60] if m.address else (m.lat + ', ' + m.lng if m.lat else '—') }}</td>
+        </tr>
+      {% endfor %}</tbody></table>
+      {% else %}<div class="card-body text-muted">No mobile check-ins</div>{% endif %}
+    </div>
+  </div>
+</div>{% endblock %}

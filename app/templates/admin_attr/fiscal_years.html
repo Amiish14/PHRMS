@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Fiscal Years{% endblock %}
+{% block page_title %}Fiscal Years{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Fiscal Year</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td class="mono" style="font-weight:600">{{ r.fiscalvalue }}</td>
+      <td class="mono" style="font-size:12px">{{ r.startdate.strftime("%d %b %Y") if r.startdate else "—" }}</td>
+      <td class="mono" style="font-size:12px">{{ r.enddate.strftime("%d %b %Y") if r.enddate else "—" }}</td>
+      <td>{% if r.isactive %}<span class="badge bg-green">Current</span>{% else %}<span class="badge bg-gray">Past</span>{% endif %}</td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No fiscal years</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

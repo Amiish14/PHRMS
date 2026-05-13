@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Employee Consolidated Report{% endblock %}
+{% block page_title %}Employee Consolidated Report{% endblock %}
+{% block content %}
+<div class="table-toolbar" style="background:#fff;border-radius:var(--r);border:1px solid var(--g200);margin-bottom:16px">
+  <form method="GET" style="display:flex;gap:8px">
+    <select class="filter-sel" name="empid" onchange="this.form.submit()">
+      <option value="">Select Employee...</option>
+      {% for e in employees %}<option value="{{ e.employeeid }}" {{ "selected" if empid==e.employeeid }}>{{ e.empname }} ({{ e.employeenumber }})</option>{% endfor %}
+    </select>
+  </form>
+</div>
+{% if emp %}
+<div class="profile-hero">
+  <div class="ph-avatar">{{ emp.empname[:2].upper() }}</div>
+  <div class="ph-info">
+    <div class="ph-name">{{ emp.empname }}</div>
+    <div class="ph-desig">{{ emp.designation or "" }} · {{ emp.departmentname or "" }}</div>
+    <div class="ph-meta">
+      <div class="ph-meta-item"><strong>{{ emp.employeenumber }}</strong>ID</div>
+      <div class="ph-meta-item"><strong>{{ emp.doj.strftime("%d %b %Y") if emp.doj else "—" }}</strong>Joined</div>
+      <div class="ph-meta-item"><strong>{{ emp.grade or "—" }}</strong>Grade</div>
+      <div class="ph-meta-item"><strong>{{ emp.vertical or "—" }}</strong>Vertical</div>
+    </div>
+  </div>
+</div>
+<div class="two-col">
+  <div class="card"><div class="card-header"><div class="card-title">Leave Balance</div></div>
+    <div class="card-body">{% for lb in leave_balance %}
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+        <span>{{ lb.typename }}</span><span class="mono">{{ lb.available|int }}/{{ lb.allotted }} days</span>
+      </div>{% endfor %}
+    </div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">Attendance Summary</div></div>
+    <div class="card-body">{% for a in att_summary %}
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+        <span>{{ a.typename }}</span><span class="mono">{{ a.cnt }} days</span>
+      </div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% if payments %}
+<div class="card"><div class="card-header"><div class="card-title">Recent Payments</div></div>
+  <table class="dt"><thead><tr><th>Date</th><th>Type</th><th>Amount</th></tr></thead>
+  <tbody>{% for p in payments %}
+    <tr><td class="mono" style="font-size:12px">{{ p.paymentdate.strftime("%d %b %Y") if p.paymentdate else "—" }}</td>
+      <td>{{ p.pay_type or "Payment" }}</td>
+      <td class="mono">₹{{ "{:,.0f}".format(p.amount or 0) }}</td>
+    </tr>{% endfor %}</tbody></table>
+</div>{% endif %}
+{% else %}
+<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--g400)">Select an employee to view their consolidated report.</div></div>
+{% endif %}{% endblock %}

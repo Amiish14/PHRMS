@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Candidates{% endblock %}
+{% block page_title %}Candidates{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Name</th><th>Email</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody>{% for c in candidates %}<tr>
+    <td>{{ c.candidatename or '—' }}</td>
+    <td>{{ c.emailaddress or '—' }}</td>
+    <td class="mono" style="font-size:12px">{{ c.createddatetime.strftime('%d %b %Y') if c.createddatetime else '—' }}</td>
+    <td><span class="badge bg-blue">Applied</span></td>
+  </tr>{% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No candidates</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

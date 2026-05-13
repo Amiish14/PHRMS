@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Leave Approvals{% endblock %}
+{% block page_title %}Leave Approvals{% endblock %}
+{% block content %}
+<div class="page-tabs">
+  <a href="?status=pending" class="page-tab {{ 'active' if status=='pending' }}">Pending</a>
+  <a href="?status=approved" class="page-tab {{ 'active' if status=='approved' }}">Approved</a>
+  <a href="?status=rejected" class="page-tab {{ 'active' if status=='rejected' }}">Rejected</a>
+  <a href="?status=" class="page-tab {{ 'active' if not status }}">All</a>
+</div>
+<div class="card">
+  <table class="dt">
+    <thead><tr><th>Employee</th><th>Leave Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for lr in result.rows %}
+      <tr>
+        <td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ lr.empname[:2].upper() }}</div>
+          <div><div class="emp-name">{{ lr.empname }}</div><div class="emp-id">{{ lr.employeenumber }}</div></div></div></td>
+        <td>{{ lr.leavetype }}</td>
+        <td class="mono" style="font-size:12px">{{ lr.startdate.strftime('%d %b %Y') if lr.startdate else '—' }}</td>
+        <td class="mono" style="font-size:12px">{{ lr.enddate.strftime('%d %b %Y') if lr.enddate else '—' }}</td>
+        <td class="mono">{{ lr.noofdays|int }}</td>
+        <td style="max-width:180px;font-size:12px">{{ lr.reasonforleave[:60] if lr.reasonforleave else '—' }}</td>
+        <td>{% if lr.employeeleaveflag==1 %}<span class="badge bg-green">Approved</span>
+            {% elif lr.employeeleaveflag==2 %}<span class="badge bg-red">Rejected</span>
+            {% else %}<span class="badge bg-amber">Pending</span>{% endif %}</td>
+        <td>{% if lr.employeeleaveflag==0 %}
+          <form method="POST" action="{{ url_for('admin.leave_action', lrid=lr.leaverequestid) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">✓</button>
+            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">✗</button>
+          </form>{% else %}—{% endif %}</td>
+      </tr>
+      {% else %}<tr><td colspan="8" style="text-align:center;color:var(--g400);padding:30px">No leave requests found</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <div class="pagination">
+    <span class="page-info">{{ result.total }} total requests</span>
+    {% if result.page > 1 %}<a href="?status={{ status }}&page={{ result.page-1 }}" class="page-btn">←</a>{% endif %}
+    {% if result.page < result.pages %}<a href="?status={{ status }}&page={{ result.page+1 }}" class="page-btn">→</a>{% endif %}
+  </div>
+</div>
+{% endblock %}

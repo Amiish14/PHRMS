@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}KPI{% endblock %}
+{% block page_title %}KPI / Performance{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Owner</th><th>Vertical</th><th>FY</th><th>Revenue Target</th><th>Expenses</th><th>Gross Profit</th></tr></thead>
+  <tbody>{% for t in targets %}<tr>
+    <td>{{ t.owner_name }}</td><td>{{ t.vertical_name or '—' }}</td>
+    <td class="mono">{{ t.fiscalyear }}</td>
+    <td class="mono">{{ '{:,.0f}'.format(t.revenue) }}</td>
+    <td class="mono">{{ '{:,.0f}'.format(t.expenses) }}</td>
+    <td class="mono">{{ '{:,.0f}'.format(t.grossprofit) }}</td>
+  </tr>{% else %}<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--g400)">No KPI data</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

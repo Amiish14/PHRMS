@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Increment Calculator{% endblock %}
+{% block page_title %}Increment Calculator{% endblock %}
+{% block content %}
+<div style="max-width:640px;margin:0 auto">
+  <div class="card">
+    <div class="card-header"><div class="card-title">📈 Increment Calculator</div></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Current CTC (Annual)</label>
+          <input type="number" class="form-input" id="currentCTC" oninput="calc()" placeholder="e.g. 600000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Increment %</label>
+          <input type="number" class="form-input" id="incrPct" oninput="calc()" placeholder="e.g. 12" step="0.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Grade</label>
+          <select class="form-select" id="grade">
+            <option value="">Select grade...</option>
+            {% for g in grades %}<option value="{{ g.typeid }}">{{ g.typename }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Effective From</label>
+          <input type="date" class="form-input" id="effectiveDate">
+        </div>
+      </div>
+      <div style="background:var(--g50);border-radius:var(--rs);padding:16px;margin-top:16px" id="result">
+        <div style="color:var(--g400);text-align:center">Enter values above to calculate</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block page_script %}
+function calc(){
+  const cur = parseFloat(document.getElementById("currentCTC").value)||0;
+  const pct = parseFloat(document.getElementById("incrPct").value)||0;
+  if(!cur||!pct){return;}
+  const increment = cur * pct/100;
+  const newCTC = cur + increment;
+  document.getElementById("result").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center">
+      <div><div style="font-size:11px;color:var(--g500)">Current Annual CTC</div><div style="font-size:18px;font-weight:700;color:var(--g700);font-family:var(--m)">₹${cur.toLocaleString("en-IN")}</div></div>
+      <div><div style="font-size:11px;color:var(--g500)">Increment Amount</div><div style="font-size:18px;font-weight:700;color:var(--amber);font-family:var(--m)">+₹${increment.toLocaleString("en-IN")}</div></div>
+      <div><div style="font-size:11px;color:var(--g500)">New Annual CTC</div><div style="font-size:18px;font-weight:700;color:var(--green);font-family:var(--m)">₹${newCTC.toLocaleString("en-IN")}</div></div>
+    </div>
+    <div style="margin-top:12px;text-align:center;font-size:12px;color:var(--g500)">Monthly: ₹${(newCTC/12).toLocaleString("en-IN",{maximumFractionDigits:0})}</div>
+  `;
+}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}CTC Summary{% endblock %}
+{% block page_title %}CTC Summary{% endblock %}
+{% block content %}
+<div class="table-toolbar" style="background:#fff;border-radius:var(--r);border:1px solid var(--g200);margin-bottom:16px">
+  <form method="GET" style="display:flex;gap:8px">
+    <select class="filter-sel" name="dept" onchange="this.form.submit()">
+      <option value="">All Departments</option>
+      {% for d in depts %}<option value="{{ d.departmentid }}" {{ "selected" if request.args.get("dept")==d.departmentid|string }}>{{ d.departmentname }}</option>{% endfor %}
+    </select>
+    <select class="filter-sel" name="vertical" onchange="this.form.submit()">
+      <option value="">All Verticals</option>
+      {% for v in verticals %}<option value="{{ v.businessunitid }}" {{ "selected" if request.args.get("vertical")==v.businessunitid|string }}>{{ v.businessunitname }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+<div class="card">
+  <table class="dt">
+    <thead><tr><th>Employee</th><th>Department</th><th>Grade</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for e in employees %}
+      <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ e.empname[:2].upper() }}</div>
+        <div><div class="emp-name">{{ e.empname }}</div><div class="emp-id">{{ e.employeenumber }}</div></div></div></td>
+        <td>{{ e.departmentname or "—" }}</td>
+        <td><span class="badge bg-navy">{{ e.grade or "—" }}</span></td>
+        <td><a href="{{ url_for("ctc.view", empid=e.employeeid) }}" class="btn btn-sm btn-ghost">View</a></td>
+      </tr>
+      {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No employees</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>{% endblock %}

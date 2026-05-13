@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ emp.empname }}{% endblock %}
+{% block page_title %}{{ emp.empname }}{% endblock %}
+{% block page_subtitle %}<span class="tb-sub">{{ emp.employeenumber }}</span>{% endblock %}
+{% block content %}
+<div class="profile-hero">
+  <div class="ph-avatar">{{ emp.empname[:2].upper() if emp.empname else '??' }}</div>
+  <div class="ph-info">
+    <div class="ph-name">{{ emp.empname }}</div>
+    <div class="ph-desig">{{ emp.designation or '' }} {% if emp.departmentname %}· {{ emp.departmentname }}{% endif %} {% if emp.vertical %}· {{ emp.vertical }}{% endif %}</div>
+    <div class="ph-meta">
+      <div class="ph-meta-item"><strong>{{ emp.employeenumber }}</strong>Employee ID</div>
+      <div class="ph-meta-item"><strong>{{ emp.doj.strftime('%d %b %Y') if emp.doj else '—' }}</strong>Date of Join</div>
+      <div class="ph-meta-item"><strong>{{ emp.grade or '—' }}</strong>Grade</div>
+      <div class="ph-meta-item"><strong>{{ emp.branchesname if emp.branchesname else '—' }}</strong>Branch</div>
+    </div>
+  </div>
+  {% if emp.activeflag %}<span class="badge" style="position:absolute;top:20px;right:20px;background:rgba(26,127,75,.2);color:#7effc0;font-size:12px;padding:4px 12px">Active</span>{% endif %}
+</div>
+<div class="two-col">
+  <div class="card"><div class="card-header"><div class="card-title">Personal Details</div></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group"><div class="form-label">Gender</div><div>{{ emp.gender or '—' }}</div></div>
+        <div class="form-group"><div class="form-label">Date of Birth</div><div>{{ emp.dob.strftime('%d %b %Y') if emp.dob else '—' }}</div></div>
+        <div class="form-group"><div class="form-label">Father/Husband</div><div>{{ emp.fhname or '—' }}</div></div>
+        <div class="form-group"><div class="form-label">Manager</div><div>{{ emp.mgr_name or '—' }}</div></div>
+        <div class="form-group"><div class="form-label">Employee Type</div><div>{{ emp.emptype or '—' }}</div></div>
+        <div class="form-group"><div class="form-label">Username</div><div class="mono">{{ emp.username or '—' }}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">Bank Details</div></div>
+    <div class="card-body">
+      {% for b in emp.bank %}
+      <div class="payslip-row"><span>Account Number</span><span class="mono">{{ b.accountnumber }}</span></div>
+      <div class="payslip-row"><span>Bank</span><span>{{ b.bankname }} — {{ b.branchname }}</span></div>
+      <div class="payslip-row"><span>IFSC</span><span class="mono">{{ b.ifsccode }}</span></div>
+      {% else %}<div class="text-muted">No bank details</div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% if emp.dependents %}
+<div class="card"><div class="card-header"><div class="card-title">Dependents</div></div>
+  <table class="dt"><thead><tr><th>Name</th><th>Type</th><th>DOB</th><th>Qualification</th></tr></thead>
+  <tbody>{% for d in emp.dependents %}<tr><td>{{ d.dependentname }}</td><td>{{ d.deptype }}</td><td>{{ d.dob.strftime('%d %b %Y') if d.dob else '—' }}</td><td>{{ d.qualification or '—' }}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>{% endif %}
+{% if emp.education %}
+<div class="card"><div class="card-header"><div class="card-title">Education</div></div>
+  <table class="dt"><thead><tr><th>Level</th><th>Degree</th><th>School/Institute</th><th>Year</th></tr></thead>
+  <tbody>{% for e in emp.education %}<tr><td>{{ e.edlevel or '—' }}</td><td>{{ e.degreename or '—' }}</td><td>{{ e.schoolname }}</td><td>{{ e.yearofcompletion }}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>{% endif %}
+{% if emp.experience %}
+<div class="card"><div class="card-header"><div class="card-title">Work Experience</div></div>
+  <table class="dt"><thead><tr><th>Company</th><th>Position</th><th>From</th><th>To</th><th>Last Salary</th></tr></thead>
+  <tbody>{% for e in emp.experience %}<tr><td>{{ e.companyname }}</td><td>{{ e.endposition }}</td><td>{{ e.startdate.strftime('%b %Y') if e.startdate else '—' }}</td><td>{{ e.enddate.strftime('%b %Y') if e.enddate else '—' }}</td><td class="mono">₹{{ '{:,.0f}'.format(e.endsalary) }}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>{% endif %}
+{% if loans %}
+<div class="card"><div class="card-header"><div class="card-title">Loans</div></div>
+  <table class="dt"><thead><tr><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+  <tbody>{% for l in loans %}<tr><td>{{ l.loantype or 'Loan' }}</td><td class="mono">₹{{ '{:,.0f}'.format(l.loanamount) if l.loanamount else '—' }}</td><td><span class="badge bg-green">Active</span></td></tr>{% endfor %}</tbody>
+  </table>
+</div>{% endif %}
+{% endblock %}

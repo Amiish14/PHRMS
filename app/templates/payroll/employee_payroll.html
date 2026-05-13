@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Payroll{% endblock %}
+{% block page_title %}{{ emp.empname if emp else 'Payroll' }}{% endblock %}
+{% block content %}
+<div class="card"><div class="card-header"><div class="card-title">Payment History</div></div>
+  <table class="dt"><thead><tr><th>Payment #</th><th>Date</th><th>Paid By</th></tr></thead>
+  <tbody>{% for cp in result.rows %}<tr>
+    <td class="mono">{{ cp.claimpaymentnumber }}</td>
+    <td class="mono" style="font-size:12px">{{ cp.paymentdate.strftime('%d %b %Y') if cp.paymentdate else '—' }}</td>
+    <td>{{ cp.paidby_name }}</td>
+  </tr>{% else %}<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--g400)">No payments</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

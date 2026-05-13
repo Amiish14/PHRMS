@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Grievances{% endblock %}
+{% block page_title %}Grievances{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>ID</th><th>Employee</th><th>Nature</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody>{% for g in result.rows %}
+    <tr><td class="mono">GRV-{{ g.grievanceid }}</td>
+      <td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ g.empname[:2].upper() }}</div>
+        <div class="emp-name">{{ g.empname }}</div></div></td>
+      <td>{{ g.nature or '—' }}</td>
+      <td class="mono" style="font-size:12px">{{ g.gdate.strftime('%d %b %Y') if g.gdate else '—' }}</td>
+      <td>{% if g.statusid==1 %}<span class="badge bg-green">Resolved</span>{% else %}<span class="badge bg-amber">Open</span>{% endif %}</td>
+    </tr>
+  {% else %}<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--g400)">No grievances</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

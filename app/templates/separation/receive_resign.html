@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Receive Resign Letter{% endblock %}
+{% block page_title %}Receive Resign Letter{% endblock %}
+{% block topbar_actions %}<button onclick="openModal("addResign")" class="btn btn-primary btn-sm">+ Add</button>{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Employee</th><th>Department</th><th>Resign Date</th><th>Last Working Day</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+      <div><div class="emp-name">{{ r.empname }}</div><div class="emp-id">{{ r.employeenumber }}</div></div></div></td>
+      <td>{{ r.departmentname or "—" }}</td>
+      <td class="mono" style="font-size:12px">{{ r.resignationdate.strftime("%d %b %Y") if r.resignationdate else "—" }}</td>
+      <td class="mono" style="font-size:12px">{{ r.lastworkingdate.strftime("%d %b %Y") if r.lastworkingdate else "—" }}</td>
+      <td>{% if r.receiveresignflag==1 %}<span class="badge bg-green">Received</span>{% else %}<span class="badge bg-amber">Pending</span>{% endif %}</td>
+    </tr>
+  {% else %}<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--g400)">No resignation letters</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

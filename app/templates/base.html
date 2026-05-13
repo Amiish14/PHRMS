@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}PHRMS{% endblock %} — Procam Group</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Procam LR brand colors */
+  --primary:#c0392b;--primary2:#e74c3c;--primary3:#922b21;
+  --sidebar:#1a1a2e;--sidebar2:#16213e;--sidebar3:#0f3460;
+  --white:#fff;--g50:#f8f9fa;--g100:#f4f5f7;--g200:#e9ecef;
+  --g300:#dee2e6;--g400:#ced4da;--g500:#adb5bd;--g600:#6c757d;
+  --g700:#495057;--g800:#343a40;--g900:#212529;
+  --green:#1a7f4b;--gbg:#e8f5ee;
+  --red:#c0392b;--rbg:#fdeaea;
+  --amber:#b45309;--abg:#fef3c7;
+  --blue:#1565c0;--bbg:#e8f0fe;
+  --navy:#1a1a2e;--navy2:#16213e;--gold:#c0392b;--gold2:#e74c3c;
+  --sw:250px;--r:8px;--rs:5px;
+  --sh:0 1px 3px rgba(0,0,0,.08);
+  --sh2:0 4px 12px rgba(0,0,0,.1);
+  --f:'DM Sans',sans-serif;--m:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);background:#f4f5f7;color:var(--g900);font-size:14px;line-height:1.6;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sb{position:fixed;top:0;left:0;width:var(--sw);height:100vh;background:var(--sidebar);display:flex;flex-direction:column;z-index:200;overflow-y:auto;overflow-x:hidden;transition:transform .25s}
+.sb-logo{padding:0 16px;height:56px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;display:flex;align-items:center;gap:10px}
+.sb-icon{width:30px;height:30px;background:var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.sb-brand strong{display:block;color:#fff;font-size:14px;font-weight:600;letter-spacing:-.2px}
+.sb-brand span{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.6px;text-transform:uppercase}
+.sb-nav{flex:1;padding:8px 0}
+.sb-section{padding:12px 16px 3px;font-size:10px;font-weight:600;letter-spacing:1px;color:rgba(255,255,255,.22);text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;color:rgba(255,255,255,.55);font-size:13px;font-weight:400;transition:all .15s;position:relative;border:none;background:none;width:100%;text-align:left;text-decoration:none;border-radius:0}
+.sb-item:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.05)}
+.sb-item.active{color:#fff;background:rgba(192,57,43,.2);font-weight:500}
+.sb-item.active::before{content:'';position:absolute;left:0;top:3px;bottom:3px;width:3px;background:var(--primary);border-radius:0 2px 2px 0}
+.sb-item svg{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.sb-item.active svg{opacity:1}
+.sb-badge{margin-left:auto;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;font-family:var(--m)}
+.sb-badge.red{background:var(--red);color:#fff}
+
+/* Collapsible sub-menus */
+.sb-group{overflow:hidden}
+.sb-group-header{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;color:rgba(255,255,255,.55);font-size:13px;font-weight:400;transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.sb-group-header:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.05)}
+.sb-group-header svg{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.sb-group-arrow{margin-left:auto;width:12px;height:12px;transition:transform .2s;opacity:.4}
+.sb-group-header.open .sb-group-arrow{transform:rotate(90deg)}
+.sb-sub{display:none;background:rgba(0,0,0,.2)}
+.sb-sub.open{display:block}
+.sb-sub .sb-item{padding-left:36px;font-size:12.5px;color:rgba(255,255,255,.45)}
+.sb-sub .sb-item:hover{color:rgba(255,255,255,.85)}
+.sb-sub .sb-item.active{color:#fff;background:rgba(192,57,43,.15)}
+.sb-sub .sb-item::before{left:0}
+
+.sb-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.sb-user{display:flex;align-items:center;gap:9px}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{color:#fff;font-size:12px;font-weight:500}
+.sb-urole{color:rgba(255,255,255,.35);font-size:11px}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sw);min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:56px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;padding:0 22px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--g200)}
+.tb-title{font-size:15px;font-weight:600;color:var(--g900);flex:1}
+.tb-sub{font-size:12px;color:var(--g500);font-weight:400;margin-left:6px}
+.tb-actions{display:flex;align-items:center;gap:8px}
+.content{flex:1;padding:20px 22px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rs);font-family:var(--f);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary3)}
+.btn-gold{background:var(--primary);color:#fff}.btn-gold:hover{background:var(--primary3)}
+.btn-ghost{background:transparent;color:var(--g700);border:1px solid var(--g300)}.btn-ghost:hover{background:var(--g50)}
+.btn-success{background:var(--gbg);color:var(--green);border:1px solid transparent}.btn-success:hover{background:var(--green);color:#fff}
+.btn-danger{background:var(--rbg);color:var(--red);border:1px solid transparent}.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-icon{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--g200);border-radius:var(--rs);cursor:pointer;color:var(--g600);transition:all .15s}
+.btn-icon:hover{background:var(--g50);color:var(--primary)}
+.notif-dot{position:relative}.notif-dot::after{content:'';position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid #fff}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:#fff;border-radius:var(--r);padding:18px;border:1px solid var(--g200);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-navy::before{background:var(--primary)}.kpi-gold::before{background:#e67e22}.kpi-green::before{background:var(--green)}.kpi-red::before{background:var(--red)}.kpi-blue::before{background:var(--blue)}.kpi-amber::before{background:var(--amber)}
+.kpi-label{font-size:11px;font-weight:500;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:600;color:var(--g900);line-height:1;font-family:var(--m);margin-bottom:4px}
+.kpi-note{font-size:12px;color:var(--g500)}.kpi-note.up{color:var(--green)}.kpi-note.dn{color:var(--red)}
+.kpi-icon{position:absolute;right:14px;top:14px;font-size:20px;opacity:.3}
+
+/* ── CARD ── */
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--g200);box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+.card-header{padding:13px 18px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px}
+.card-title{font-size:14px;font-weight:600;color:var(--navy);flex:1}
+.card-body{padding:18px}
+
+/* ── TABLES ── */
+.table-toolbar{display:flex;align-items:center;gap:8px;padding:11px 18px;border-bottom:1px solid var(--g100);background:var(--g50);flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--g300);border-radius:var(--rs);padding:5px 10px;flex:1;max-width:280px}
+.search-box input{border:none;outline:none;font-family:var(--f);font-size:13px;color:var(--g800);width:100%}
+.search-box input::placeholder{color:var(--g400)}
+.filter-sel{border:1px solid var(--g300);border-radius:var(--rs);padding:5px 9px;font-family:var(--f);font-size:13px;color:var(--g700);background:#fff;outline:none;cursor:pointer}
+.dt{width:100%;border-collapse:collapse}
+.dt th{padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.4px;background:var(--g50);border-bottom:1px solid var(--g200);white-space:nowrap}
+.dt td{padding:10px 14px;border-bottom:1px solid var(--g100);font-size:13px;color:var(--g800);vertical-align:middle}
+.dt tbody tr{transition:background .12s;cursor:pointer}
+.dt tbody tr:hover{background:var(--g50)}
+.dt tr:last-child td{border-bottom:none}
+
+/* ── EMPLOYEE CELL ── */
+.emp-cell{display:flex;align-items:center;gap:9px}
+.emp-av{width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.emp-name{font-weight:500;color:var(--navy);font-size:13px}
+.emp-id{font-size:11px;color:var(--g500);font-family:var(--m)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.bg-green{background:var(--gbg);color:var(--green)}
+.bg-red{background:var(--rbg);color:var(--red)}
+.bg-amber{background:var(--abg);color:var(--amber)}
+.bg-blue{background:var(--bbg);color:var(--blue)}
+.bg-navy{background:rgba(11,61,107,.08);color:var(--navy)}
+.bg-gray{background:var(--g100);color:var(--g600)}
+
+/* ── ATTENDANCE ── */
+.att-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.att-day-hdr{text-align:center;font-size:10px;font-weight:600;color:var(--g400);padding-bottom:4px;text-transform:uppercase}
+.att-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;cursor:default;position:relative}
+.att-today{border:2px solid var(--primary)!important}
+.att-mobile::after{content:'📱';position:absolute;top:0;right:0;font-size:7px}
+
+/* ── LEAVE BALANCE ── */
+.lb-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.lb-card{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:14px;text-align:center}
+.lb-type{font-size:11px;font-weight:500;color:var(--g600);margin-bottom:3px}
+.lb-val{font-size:24px;font-weight:700;font-family:var(--m);line-height:1}
+.lb-total{font-size:11px;color:var(--g400);margin-top:1px}
+.lb-bar{height:4px;border-radius:2px;background:var(--g200);margin-top:7px;overflow:hidden}
+.lb-fill{height:100%;border-radius:2px}
+
+/* ── FORMS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid-3{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:12px;font-weight:500;color:var(--g700)}.form-label .req{color:var(--red);margin-left:2px}
+.form-input,.form-select,.form-textarea{border:1px solid var(--g300);border-radius:var(--rs);padding:7px 11px;font-family:var(--f);font-size:13px;color:var(--g900);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(192,57,43,.08)}
+.form-textarea{resize:vertical;min-height:70px}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);backdrop-filter:blur(3px);z-index:300;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.14);animation:su .18s ease}
+@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:16px 22px 12px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px}
+.modal-title{font-size:15px;font-weight:600;color:var(--g900);flex:1}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--g400);font-size:20px;line-height:1;transition:color .15s}.modal-close:hover{color:var(--g800)}
+.modal-body{padding:18px 22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--g100);display:flex;justify-content:flex-end;gap:8px}
+
+/* ── LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.col-2-1{grid-template-columns:2fr 1fr}
+.col-3-2{grid-template-columns:3fr 2fr}
+.flex{display:flex}.flex-1{flex:1}.items-center{align-items:center}.gap-8{gap:8px}
+.mt-16{margin-top:16px}.mb-16{margin-bottom:16px}
+.divider{height:1px;background:var(--g100);margin:14px 0}
+.text-muted{color:var(--g500)}.text-navy{color:var(--primary);font-weight:500}.mono{font-family:var(--m)}
+.text-right{text-align:right}.text-center{text-align:center}
+
+/* ── FLASH ── */
+.flash-container{padding:0 22px;margin-top:10px}
+.flash{padding:9px 14px;border-radius:var(--rs);margin-bottom:7px;font-size:13px}
+.flash-success{background:var(--gbg);color:var(--green);border:1px solid rgba(26,127,75,.2)}
+.flash-danger{background:var(--rbg);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.flash-warning{background:var(--abg);color:var(--amber);border:1px solid rgba(180,83,9,.2)}
+.flash-info{background:var(--bbg);color:var(--blue);border:1px solid rgba(21,101,192,.2)}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;gap:4px;padding:11px 18px;border-top:1px solid var(--g100)}
+.page-info{flex:1;font-size:12px;color:var(--g500)}
+.page-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid var(--g300);border-radius:var(--rs);font-size:13px;color:var(--g700);cursor:pointer;background:#fff;transition:all .12s;text-decoration:none}
+.page-btn:hover,.page-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ── PROFILE HERO ── */
+.profile-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;margin-bottom:18px;position:relative;overflow:hidden}
+.profile-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:150px;height:150px;border-radius:50%;background:rgba(201,162,39,.07)}
+.ph-avatar{width:64px;height:64px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--navy);flex-shrink:0;border:3px solid rgba(255,255,255,.25)}
+.ph-info{flex:1}
+.ph-name{font-size:20px;font-weight:600;color:#fff;letter-spacing:-.3px}
+.ph-desig{font-size:13px;color:rgba(255,255,255,.6);margin-top:2px}
+.ph-meta{display:flex;gap:18px;margin-top:10px;flex-wrap:wrap}
+.ph-meta-item{font-size:12px;color:rgba(255,255,255,.5)}
+.ph-meta-item strong{display:block;color:#fff;font-size:13px;font-weight:500}
+
+/* ── TABS ── */
+.page-tabs{display:flex;gap:2px;background:var(--g100);border-radius:var(--rs);padding:3px;width:fit-content;margin-bottom:16px;flex-wrap:wrap}
+.page-tab{padding:5px 12px;border-radius:5px;font-size:13px;font-weight:500;cursor:pointer;color:var(--g600);border:none;background:none;transition:all .15s;text-decoration:none}
+.page-tab.active{background:#fff;color:var(--primary);box-shadow:var(--sh)}
+
+/* ── PAYSLIP ── */
+.payslip-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--g100);font-size:13px}
+.payslip-row:last-child{border-bottom:none}
+.payslip-row.total{border-top:2px solid var(--primary);border-bottom:none;font-weight:600;font-size:14px;color:var(--primary);margin-top:3px;padding-top:10px}
+.payslip-row.deduct{color:var(--red)}
+.payslip-amt{font-family:var(--m);font-size:13px}
+
+/* ── MOBILE ── */
+.mobile-checkin-card{background:linear-gradient(135deg,var(--primary3) 0%,var(--primary) 100%);border-radius:var(--r);padding:22px;color:#fff;text-align:center;margin-bottom:18px}
+.checkin-btn{background:var(--gold);color:var(--navy);border:none;border-radius:50px;padding:12px 36px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--f);transition:all .15s;width:100%;max-width:260px}
+.checkin-btn:hover{background:var(--gold2);transform:scale(1.02)}
+
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--g300);border-radius:3px}
+.mobile-menu-btn{display:none;width:34px;height:34px;align-items:center;justify-content:center;background:var(--g100);border:none;border-radius:var(--rs);cursor:pointer;color:var(--g700)}
+
+@media(max-width:768px){
+  :root{--sw:0px}
+  .sb{transform:translateX(-100%);z-index:300}
+  .sb.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .lb-grid{grid-template-columns:1fr 1fr}
+  .two-col{grid-template-columns:1fr}
+  .form-grid,.form-grid-3{grid-template-columns:1fr}
+  .mobile-hide{display:none}
+  .mobile-menu-btn{display:flex!important}
+}
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<nav class="sb" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-icon">P</div>
+    <div class="sb-brand">
+      <strong>PHRMS</strong>
+      <span>Procam Group</span>
+    </div>
+  </div>
+
+  <div class="sb-nav">
+
+    {# ── DASHBOARD ── #}
+    {% if current_user.is_admin %}
+    <a href="{{ url_for('admin.dashboard') }}" class="sb-item {{ 'active' if request.endpoint == 'admin.dashboard' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    {% elif current_user.is_hr %}
+    <a href="{{ url_for('hr.dashboard') }}" class="sb-item {{ 'active' if request.endpoint == 'hr.dashboard' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      HR Dashboard
+    </a>
+    {% else %}
+    <a href="{{ url_for('employee.dashboard') }}" class="sb-item {{ 'active' if request.endpoint == 'employee.dashboard' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      My Dashboard
+    </a>
+    {% endif %}
+
+    {# ── HR SECTION ── #}
+    <div class="sb-section">HR</div>
+
+    {% if current_user.is_admin or current_user.is_hr %}
+    <a href="{{ url_for('admin.employees') if current_user.is_admin else url_for('hr.employees') }}" class="sb-item {{ 'active' if 'employees' in (request.endpoint or '') and 'attr' not in (request.endpoint or '') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Employees
+    </a>
+    {% else %}
+    <a href="{{ url_for('employee.profile') }}" class="sb-item {{ 'active' if request.endpoint == 'employee.profile' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      My Profile
+    </a>
+    {% endif %}
+
+    {# Attendance group #}
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'attendance' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Attendance
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'attendance' in (request.endpoint or '') }}">
+        {% if current_user.is_admin or current_user.is_hr %}
+        <a href="{{ url_for('admin.attendance') if current_user.is_admin else url_for('hr.attendance') }}" class="sb-item">Full Time Attendance</a>
+        <a href="{{ url_for('reports.attendance_report') }}" class="sb-item">Attendance Report</a>
+        {% else %}
+        <a href="{{ url_for('employee.my_attendance') }}" class="sb-item">My Attendance</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Leave group #}
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'leave' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Leave
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'leave' in (request.endpoint or '') }}">
+        {% if current_user.is_admin or current_user.is_hr %}
+        <a href="{{ url_for('admin.leave_approvals') if current_user.is_admin else url_for('hr.leave_management') }}" class="sb-item">Leave Approvals</a>
+        {% else %}
+        <a href="{{ url_for('employee.my_leave') }}" class="sb-item">My Leave</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Recruitment group #}
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'recruitment' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Recruitment
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'recruitment' in (request.endpoint or '') }}">
+        <a href="{{ url_for('recruitment.candidates') }}" class="sb-item">Candidates</a>
+        <a href="{{ url_for('recruitment.offer_letters') }}" class="sb-item">Offer Letters</a>
+        <a href="{{ url_for('recruitment.appointment_letters') }}" class="sb-item">Appointment Letters</a>
+        <a href="{{ url_for('recruitment.consultancy') }}" class="sb-item">Consultancy</a>
+        <a href="{{ url_for('recruitment.index') }}" class="sb-item">Requisitions</a>
+      </div>
+    </div>
+
+    {# Separation group #}
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'separation' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Separation Process
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'separation' in (request.endpoint or '') }}">
+        <a href="{{ url_for('separation.receive_resign') }}" class="sb-item">Receive Resign Letter</a>
+        <a href="{{ url_for('separation.accept_resign') }}" class="sb-item">Accept Resign Letter</a>
+        <a href="{{ url_for('separation.noc_departments') }}" class="sb-item">NOC From Departments</a>
+        <a href="{{ url_for('separation.experience_letter') }}" class="sb-item">Experience Letter</a>
+        <a href="{{ url_for('separation.no_due') }}" class="sb-item">No Due Certificate</a>
+      </div>
+    </div>
+
+    <a href="{{ url_for('grievance.index') }}" class="sb-item {{ 'active' if 'grievance' in (request.endpoint or '') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Grievances
+    </a>
+
+    {# ── PAYROLL SECTION ── #}
+    <div class="sb-section">Payroll</div>
+
+    {# Payslip group #}
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'payslip' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Payslip
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'payslip' in (request.endpoint or '') }}">
+        {% if current_user.is_admin or current_user.is_hr %}
+        <a href="{{ url_for('payslip.index') }}" class="sb-item">Individual Payslip</a>
+        <a href="{{ url_for('payslip.fulltime') }}" class="sb-item">Full Time Payslip</a>
+        {% else %}
+        <a href="{{ url_for('payslip.index') }}" class="sb-item">My Payslips</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# CTC group #}
+    {% if current_user.is_admin or current_user.is_hr %}
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'ctc' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        CTC
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'ctc' in (request.endpoint or '') }}">
+        <a href="{{ url_for('ctc.index') }}" class="sb-item">CTC View</a>
+        <a href="{{ url_for('ctc.summary') }}" class="sb-item">CTC Summary</a>
+        <a href="{{ url_for('ctc.increment') }}" class="sb-item">Increment Calculator</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('iou.index') }}" class="sb-item {{ 'active' if 'iou' in (request.endpoint or '') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      IOU / Advances
+    </a>
+
+    <a href="{{ url_for('employee.my_loans') if current_user.is_employee else url_for('payroll.index') }}" class="sb-item {{ 'active' if 'loans' in (request.endpoint or '') or 'payroll' in (request.endpoint or '') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      {{ 'My Loans' if current_user.is_employee else 'Payroll / Claims' }}
+    </a>
+
+    {% if current_user.is_admin or current_user.is_hr %}
+    <a href="{{ url_for('foodcoupon.index') }}" class="sb-item {{ 'active' if 'foodcoupon' in (request.endpoint or '') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Food Coupon
+    </a>
+    {% endif %}
+
+    {# ── NPR SECTION ── #}
+    {% if current_user.is_admin or current_user.is_hr %}
+    <div class="sb-section">NPR (Part Time)</div>
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'npr' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        NPR
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'npr' in (request.endpoint or '') }}">
+        <a href="{{ url_for('npr.index') }}" class="sb-item">NPR Employees</a>
+        <a href="{{ url_for('npr.attendance') }}" class="sb-item">Attendance - Part Time</a>
+        <a href="{{ url_for('npr.payslip') }}" class="sb-item">Payslip - Part Time</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── REPORTS ── #}
+    {% if current_user.is_admin or current_user.is_hr %}
+    <div class="sb-section">Reports</div>
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'reports' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Reports
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'reports' in (request.endpoint or '') }}">
+        <a href="{{ url_for('reports.attendance_report') }}" class="sb-item">Daily Attendance</a>
+        <a href="{{ url_for('reports.salary_payment') }}" class="sb-item">Salary Payment</a>
+        <a href="{{ url_for('reports.bonus_payment') }}" class="sb-item">Bonus Payment</a>
+        <a href="{{ url_for('reports.pf_challan') }}" class="sb-item">PF Challan</a>
+        <a href="{{ url_for('reports.employee_consolidated') }}" class="sb-item">Employee Consolidated</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── KPI & TRAVEL ── #}
+    <div class="sb-section">Performance</div>
+    <a href="{{ url_for('kpi.index') }}" class="sb-item {{ 'active' if 'kpi' in (request.endpoint or '') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      KPI / Performance
+    </a>
+    <a href="{{ url_for('travel.index') }}" class="sb-item {{ 'active' if 'travel' in (request.endpoint or '') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.64 3.49a2 2 0 0 1 1.99-2.18H6"/></svg>
+      Travel Desk
+    </a>
+
+    {# ── ADMIN ── #}
+    {% if current_user.is_admin %}
+    <div class="sb-section">Admin</div>
+
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'admin_attr' in (request.endpoint or '') and 'grade' in (request.endpoint or '') or 'salary' in (request.endpoint or '') or 'leave_types' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        HR Attributes
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub">
+        <a href="{{ url_for('admin_attr.grades') }}" class="sb-item">Grade Types</a>
+        <a href="{{ url_for('admin_attr.salary_types') }}" class="sb-item">Salary Types</a>
+        <a href="{{ url_for('admin_attr.leave_types') }}" class="sb-item">Leave Types</a>
+        <a href="{{ url_for('admin_attr.attendance_types') }}" class="sb-item">Attendance Types</a>
+        <a href="{{ url_for('admin_attr.employee_types') }}" class="sb-item">Employee Types</a>
+        <a href="{{ url_for('admin_attr.departments') }}" class="sb-item">Departments</a>
+        <a href="{{ url_for('admin_attr.designations') }}" class="sb-item">Designations</a>
+        <a href="{{ url_for('admin_attr.investment_types') }}" class="sb-item">Investment Types</a>
+        <a href="{{ url_for('admin_attr.iou_types') }}" class="sb-item">IOU Types</a>
+      </div>
+    </div>
+
+    <div class="sb-group">
+      <button class="sb-group-header" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Org Structure
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub">
+        <a href="{{ url_for('admin_attr.branches') }}" class="sb-item">Branches</a>
+        <a href="{{ url_for('admin_attr.business_units') }}" class="sb-item">Business Units</a>
+        <a href="{{ url_for('admin_attr.fiscal_years') }}" class="sb-item">Fiscal Years</a>
+        <a href="{{ url_for('admin_attr.holidays') }}" class="sb-item">Holidays</a>
+      </div>
+    </div>
+
+    <div class="sb-group">
+      <button class="sb-group-header {{ 'open' if 'user_mgmt' in (request.endpoint or '') }}" onclick="toggleGroup(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+        User Management
+        <svg class="sb-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="sb-sub {{ 'open' if 'user_mgmt' in (request.endpoint or '') }}">
+        <a href="{{ url_for('user_mgmt.index') }}" class="sb-item">Users</a>
+        <a href="{{ url_for('user_mgmt.roles') }}" class="sb-item">Roles</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── ACCOUNT ── #}
+    <div class="sb-section" style="margin-top:6px">Account</div>
+    <a href="{{ url_for('auth.change_password') }}" class="sb-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Change Password
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="sb-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+
+  </div>
+
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">{{ (current_user.firstname[:1] + (current_user.lastname[:1] if current_user.lastname else '')) if current_user.firstname else current_user.username[:2].upper() }}</div>
+      <div>
+        <div class="sb-uname">{{ current_user.fullname or current_user.username }}</div>
+        <div class="sb-urole">{{ current_user.rolename or current_user.usertype }}</div>
+      </div>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<div class="main">
+  {% if current_user.is_authenticated %}
+  <div class="topbar">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" style="margin-right:8px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="tb-title">
+      {% block page_title %}PHRMS{% endblock %}
+      {% block page_subtitle %}{% endblock %}
+    </div>
+    <div class="tb-actions">
+      {% block topbar_actions %}{% endblock %}
+      <button class="btn-icon notif-dot" title="Notifications">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+  {% endif %}
+
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+{% block modals %}{% endblock %}
+
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function toggleGroup(btn){
+  btn.classList.toggle('open');
+  const sub = btn.nextElementSibling;
+  if(sub) sub.classList.toggle('open');
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+});
+document.addEventListener('click', function(e){
+  const sb = document.getElementById('sidebar');
+  if(sb && !sb.contains(e.target) && !e.target.closest('.mobile-menu-btn')){
+    sb.classList.remove('open');
+  }
+});
+{% block page_script %}{% endblock %}
+</script>
+</body>
+</html>

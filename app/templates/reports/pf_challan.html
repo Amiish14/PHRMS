@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}PF Challan{% endblock %}
+{% block page_title %}PF Challan{% endblock %}
+{% block content %}
+<div class="table-toolbar" style="background:#fff;border-radius:var(--r);border:1px solid var(--g200);margin-bottom:16px">
+  <form method="GET" style="display:flex;gap:8px">
+    <select class="filter-sel" name="month">{% for m in range(1,13) %}<option value="{{ m }}" {{ "selected" if m==month }}>{{ ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m] }}</option>{% endfor %}</select>
+    <select class="filter-sel" name="year">{% for y in range(2015,2027) %}<option value="{{ y }}" {{ "selected" if y==year }}>{{ y }}</option>{% endfor %}</select>
+    <button type="submit" class="btn btn-primary btn-sm">Generate</button>
+  </form>
+</div>
+<div class="card">
+  <div class="card-header"><div class="card-title">PF Challan — {{ ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month] }} {{ year }}</div></div>
+  <table class="dt"><thead><tr><th>Employee</th><th>Department</th><th>Grade</th><th>Employee PF (12%)</th><th>Employer PF (12%)</th><th>Total</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+      <div><div class="emp-name">{{ r.empname }}</div><div class="emp-id">{{ r.employeenumber }}</div></div></div></td>
+      <td>{{ r.departmentname or "—" }}</td>
+      <td><span class="badge bg-navy">{{ r.grade or "—" }}</span></td>
+      <td class="mono text-muted">—</td>
+      <td class="mono text-muted">—</td>
+      <td class="mono text-muted">—</td>
+    </tr>
+  {% else %}<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--g400)">No data</td></tr>{% endfor %}
+  </tbody></table>
+  <div style="padding:12px 18px;font-size:12px;color:var(--g500);border-top:1px solid var(--g100)">
+    PF = 12% of Basic Salary. Connect salary structure data to generate exact figures.
+  </div>
+</div>{% endblock %}

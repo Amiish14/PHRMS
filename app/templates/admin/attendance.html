@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+{% block page_subtitle %}<span class="tb-sub">{{ selected_date.strftime('%d %b %Y') }}</span>{% endblock %}
+{% block topbar_actions %}
+<form method="GET" style="display:flex;gap:8px;align-items:center">
+  <input type="date" name="date" value="{{ selected_date.isoformat() }}" class="form-input" style="width:160px;padding:5px 10px;font-size:13px" onchange="this.form.submit()">
+  <button type="submit" class="btn btn-sm btn-primary">View</button>
+</form>
+{% endblock %}
+{% block content %}
+<div class="kpi-grid">
+  <div class="kpi-card kpi-green"><div class="kpi-icon">✅</div><div class="kpi-label">Present</div><div class="kpi-value">{{ present_count }}</div></div>
+  <div class="kpi-card kpi-amber"><div class="kpi-icon">🏖️</div><div class="kpi-label">On Leave</div><div class="kpi-value">{{ leave_count }}</div></div>
+  <div class="kpi-card kpi-blue"><div class="kpi-icon">📱</div><div class="kpi-label">Mobile Check-ins</div><div class="kpi-value">{{ mobile_count }}</div></div>
+  <div class="kpi-card kpi-red"><div class="kpi-icon">⏳</div><div class="kpi-label">Regulation Requests</div><div class="kpi-value">{{ stats.pending_attendance_reg }}</div></div>
+</div>
+{% if reg_requests %}
+<div class="card"><div class="card-header"><div class="card-title">🔁 Pending Regulation Requests</div></div>
+  <table class="dt"><thead><tr><th>Employee</th><th>Dates</th><th>Type</th><th>Reason</th><th>Action</th></tr></thead>
+  <tbody>{% for r in reg_requests %}
+  <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div><div class="emp-name">{{ r.empname }}</div></div></td>
+  <td class="mono" style="font-size:12px">{{ r.startdate.strftime("%d %b") if r.startdate else "—" }} – {{ r.enddate.strftime("%d %b") if r.enddate else "—" }}</td>
+  <td>{{ r.atttype }}</td>
+  <td style="max-width:200px;font-size:12px">{{ r.reasonforleave[:80] if r.reasonforleave else "—" }}</td>
+  <td><form method="POST" action="{{ url_for("attendance.regulation_action", reqid=r.attendanceregulationrequestid) }}" style="display:inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">✓</button>
+    <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">✗</button>
+  </form></td></tr>
+  {% endfor %}</tbody></table>
+</div>{% endif %}
+<div class="card"><div class="card-header"><div class="card-title">Attendance — {{ selected_date.strftime("%d %b %Y") }}</div><span class="badge bg-navy">{{ records|length }} records</span></div>
+  {% if not records %}
+  <div class="card-body" style="text-align:center;padding:40px;color:var(--g400)">
+    <div style="font-size:40px;margin-bottom:12px">📅</div>
+    <div style="font-size:15px;font-weight:500;color:var(--g600)">No attendance records for {{ selected_date.strftime("%d %b %Y") }}</div>
+    <div style="font-size:13px;margin-top:6px">Attendance data exists from Mar 2019 to Oct 2022. Try selecting a date in that range.</div>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <a href="?date=2022-10-01" class="btn btn-sm btn-ghost">Oct 2022</a>
+      <a href="?date=2022-06-15" class="btn btn-sm btn-ghost">Jun 2022</a>
+      <a href="?date=2021-12-01" class="btn btn-sm btn-ghost">Dec 2021</a>
+      <a href="?date=2020-01-15" class="btn btn-sm btn-ghost">Jan 2020</a>
+      <a href="?date=2019-06-01" class="btn btn-sm btn-ghost">Jun 2019</a>
+    </div>
+  </div>
+  {% else %}
+  <table class="dt"><thead><tr><th>Employee</th><th>Department</th><th>Vertical</th><th>Status</th><th>Mobile</th><th>Time</th></tr></thead>
+  <tbody>{% for r in records %}
+  <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+    <div><div class="emp-name">{{ r.empname }}</div><div class="emp-id">{{ r.employeenumber }}</div></div></div></td>
+  <td>{{ r.departmentname or "—" }}</td>
+  <td><span class="badge bg-navy">{{ r.vertical or "—" }}</span></td>
+  <td><span class="badge" style="background:{{ r.typecolour or "#eee" }}20;color:{{ r.typecolour or "#666" }}">{{ r.atttype }}</span></td>
+  <td>{% if r.ismobile %}<span class="badge bg-blue">📱</span>{% else %}—{% endif %}</td>
+  <td class="mono" style="font-size:12px">{{ r.checkin_time.strftime("%H:%M") if r.checkin_time else "—" }}</td>
+  </tr>{% endfor %}
+  </tbody></table>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Accept Resign Letter{% endblock %}
+{% block page_title %}Accept Resign Letter{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>Employee</th><th>Accept Date</th><th>Last Working Day</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+      <div><div class="emp-name">{{ r.empname }}</div><div class="emp-id">{{ r.employeenumber }}</div></div></div></td>
+      <td class="mono" style="font-size:12px">{{ r.acceptdate.strftime("%d %b %Y") if r.acceptdate else "—" }}</td>
+      <td class="mono" style="font-size:12px">{{ r.lastworkingdate.strftime("%d %b %Y") if r.lastworkingdate else "—" }}</td>
+      <td>{% if r.acceptresignflag==1 %}<span class="badge bg-green">Accepted</span>{% else %}<span class="badge bg-amber">Pending</span>{% endif %}</td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No records</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

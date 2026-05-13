@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Grade Types{% endblock %}
+{% block page_title %}Grade Types{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>ID</th><th>Grade Name</th><th>Description</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td class="mono" style="font-size:11px;color:var(--g400)">{{ r.typeid }}</td>
+      <td><span class="badge bg-navy">{{ r.typename }}</span></td>
+      <td>{{ r.description or "—" }}</td>
+      <td><span class="badge bg-green">Active</span></td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No grades</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

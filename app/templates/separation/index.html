@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Separation Process{% endblock %}
+{% block page_title %}Separation Process{% endblock %}
+{% block content %}
+<div class="kpi-grid">
+  <a href="{{ url_for("separation.receive_resign") }}" class="kpi-card kpi-navy" style="text-decoration:none">
+    <div class="kpi-icon">📄</div><div class="kpi-label">Resign Letters</div><div class="kpi-value">{{ rows|length }}</div></a>
+  <a href="{{ url_for("separation.noc_departments") }}" class="kpi-card kpi-amber" style="text-decoration:none">
+    <div class="kpi-icon">✅</div><div class="kpi-label">NOC From Depts</div><div class="kpi-value">0</div></a>
+  <a href="{{ url_for("separation.experience_letter") }}" class="kpi-card kpi-blue" style="text-decoration:none">
+    <div class="kpi-icon">📋</div><div class="kpi-label">Experience Letters</div><div class="kpi-value">0</div></a>
+  <a href="{{ url_for("separation.no_due") }}" class="kpi-card kpi-green" style="text-decoration:none">
+    <div class="kpi-icon">🏁</div><div class="kpi-label">No Due Certificates</div><div class="kpi-value">0</div></a>
+</div>
+<div class="card">
+  <div class="card-header"><div class="card-title">Recent Separations</div></div>
+  <table class="dt"><thead><tr><th>Employee</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+      <div><div class="emp-name">{{ r.empname }}</div><div class="emp-id">{{ r.employeenumber }}</div></div></div></td>
+      <td>Resignation</td>
+      <td class="mono" style="font-size:12px">{{ r.resignationdate.strftime("%d %b %Y") if r.resignationdate else "—" }}</td>
+      <td><span class="badge bg-amber">In Process</span></td>
+    </tr>
+  {% else %}<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--g400)">No separation records</td></tr>{% endfor %}
+  </tbody></table>
+</div>{% endblock %}

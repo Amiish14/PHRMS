@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block content %}
+<div class="table-toolbar" style="background:#fff;border-radius:var(--r);border:1px solid var(--g200);margin-bottom:16px">
+  <form method="GET" style="display:flex;gap:8px;flex:1">
+    <div class="search-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" name="q" value="{{ search }}" placeholder="Search username..."></div>
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+</div>
+<div class="card">
+  <table class="dt"><thead><tr><th>User</th><th>Employee</th><th>Role</th><th>Type</th><th>Mobile Att.</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>{% for u in rows %}
+    <tr><td class="mono" style="font-size:12px">{{ u.username }}</td>
+      <td><div class="emp-cell"><div class="emp-av" style="font-size:10px;background:var(--navy2)">{{ (u.empname[:2].upper() if u.empname.strip() else "??") }}</div>
+        <div><div style="font-size:12px;font-weight:500">{{ u.empname.strip() or "—" }}</div><div class="emp-id">{{ u.employeenumber or "—" }}</div></div></div></td>
+      <td><span class="badge bg-navy">{{ u.rolename }}</span></td>
+      <td><span class="badge bg-gray">{{ u.usertype }}</span></td>
+      <td>{% if u.mobileattendanceflag %}<span class="badge bg-green">✓ Enabled</span>{% else %}<span class="badge bg-gray">Disabled</span>{% endif %}</td>
+      <td>{% if u.activestatus %}<span class="badge bg-green">Active</span>{% else %}<span class="badge bg-red">Inactive</span>{% endif %}</td>
+      <td>
+        <button onclick="openModal("resetModal{{ u.userid }}")" class="btn btn-sm btn-ghost">Reset Pwd</button>
+        <form method="POST" action="{{ url_for("user_mgmt.toggle_mobile", userid=u.userid) }}" style="display:inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-sm btn-ghost">Toggle Mobile</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    {% if not rows %}<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--g400)">No users found</td></tr>{% endif %}
+  </tbody></table>
+  <div class="pagination">
+    <span class="page-info">{{ total }} total users</span>
+    {% if page > 1 %}<a href="?page={{ page-1 }}&q={{ search }}" class="page-btn">←</a>{% endif %}
+    {% for p in range(1, pages+1) %}{% if p == page %}<span class="page-btn active">{{ p }}</span>{% elif p<=3 or p>pages-2 or (p>=page-1 and p<=page+1) %}<a href="?page={{ p }}&q={{ search }}" class="page-btn">{{ p }}</a>{% endif %}{% endfor %}
+    {% if page < pages %}<a href="?page={{ page+1 }}&q={{ search }}" class="page-btn">→</a>{% endif %}
+  </div>
+</div>
+{% for u in rows %}
+<div class="modal-overlay" id="resetModal{{ u.userid }}">
+  <div class="modal"><div class="modal-header"><div class="modal-title">Reset Password — {{ u.username }}</div><button class="modal-close" onclick="closeModal("resetModal{{ u.userid }}")">×</button></div>
+    <div class="modal-body"><form method="POST" action="{{ url_for("user_mgmt.reset_password", userid=u.userid) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label class="form-label">New Password</label>
+        <input type="text" class="form-input" name="new_password" value="Procam@2024" required></div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" onclick="closeModal("resetModal{{ u.userid }}")">Cancel</button>
+        <button type="submit" class="btn btn-primary">Reset Password</button></div>
+    </form></div>
+  </div>
+</div>
+{% endfor %}{% endblock %}

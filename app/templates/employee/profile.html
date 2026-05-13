@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+{% if emp %}
+<div class="profile-hero">
+  <div class="ph-avatar">{{ emp.empname[:2].upper() if emp.empname else '??' }}</div>
+  <div class="ph-info">
+    <div class="ph-name">{{ emp.empname }}</div>
+    <div class="ph-desig">{{ emp.designation or '' }} {% if emp.departmentname %}· {{ emp.departmentname }}{% endif %}</div>
+    <div class="ph-meta">
+      <div class="ph-meta-item"><strong>{{ emp.employeenumber }}</strong>Employee ID</div>
+      <div class="ph-meta-item"><strong>{{ emp.doj.strftime('%d %b %Y') if emp.doj else '—' }}</strong>Joined</div>
+      <div class="ph-meta-item"><strong>{{ emp.grade or '—' }}</strong>Grade</div>
+      <div class="ph-meta-item"><strong>{{ emp.vertical or '—' }}</strong>Vertical</div>
+    </div>
+  </div>
+</div>
+<div class="two-col">
+  <div class="card"><div class="card-header"><div class="card-title">Personal Details</div></div>
+    <div class="card-body"><div class="form-grid">
+      <div class="form-group"><div class="form-label">Gender</div><div>{{ emp.gender or '—' }}</div></div>
+      <div class="form-group"><div class="form-label">Date of Birth</div><div>{{ emp.dob.strftime('%d %b %Y') if emp.dob else '—' }}</div></div>
+      <div class="form-group"><div class="form-label">Department</div><div>{{ emp.departmentname or '—' }}</div></div>
+      <div class="form-group"><div class="form-label">Manager</div><div>{{ emp.mgr_name or '—' }}</div></div>
+    </div></div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">Bank Details</div></div>
+    <div class="card-body">{% for b in emp.bank %}
+      <div class="payslip-row"><span>Account</span><span class="mono">{{ b.accountnumber }}</span></div>
+      <div class="payslip-row"><span>Bank</span><span>{{ b.bankname }}</span></div>
+      <div class="payslip-row"><span>IFSC</span><span class="mono">{{ b.ifsccode }}</span></div>
+    {% else %}<div class="text-muted">No bank details on record</div>{% endfor %}</div>
+  </div>
+</div>
+{% if emp.education %}
+<div class="card"><div class="card-header"><div class="card-title">Education</div></div>
+  <table class="dt"><thead><tr><th>Level</th><th>Degree</th><th>Institution</th><th>Year</th></tr></thead>
+  <tbody>{% for e in emp.education %}<tr><td>{{ e.edlevel or '—' }}</td><td>{{ e.degreename or '—' }}</td><td>{{ e.schoolname }}</td><td>{{ e.yearofcompletion }}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>{% endif %}
+{% else %}<div class="card"><div class="card-body">Profile not found.</div></div>{% endif %}
+{% endblock %}

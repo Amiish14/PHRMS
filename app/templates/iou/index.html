@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}IOU / Advances{% endblock %}
+{% block page_title %}IOU / Advances{% endblock %}
+{% block topbar_actions %}<button onclick="openModal("iouModal")" class="btn btn-primary btn-sm">+ New Request</button>{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="dt"><thead><tr><th>IOU #</th><th>Employee</th><th>Type</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody>{% for r in rows %}
+    <tr><td class="mono">{{ r.iounumber }}</td>
+      <td><div class="emp-cell"><div class="emp-av" style="font-size:10px">{{ r.empname[:2].upper() }}</div>
+        <div class="emp-name">{{ r.empname }}</div></div></td>
+      <td>{{ r.ioutype or "—" }}</td>
+      <td class="mono">₹{{ "{:,.0f}".format(r.advanceamount or 0) }}</td>
+      <td class="mono" style="font-size:12px">{{ r.createddatetime.strftime("%d %b %Y") if r.createddatetime else "—" }}</td>
+      <td>{% if r.iourequestflag==1 %}<span class="badge bg-green">Approved</span>
+          {% elif r.iourequestflag==2 %}<span class="badge bg-red">Rejected</span>
+          {% else %}<span class="badge bg-amber">Pending</span>{% endif %}</td>
+    </tr>
+  {% else %}<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--g400)">No IOU requests</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}
+{% block modals %}
+<div class="modal-overlay" id="iouModal">
+  <div class="modal"><div class="modal-header"><div class="modal-title">New IOU Request</div><button class="modal-close" onclick="closeModal("iouModal")">×</button></div>
+    <div class="modal-body"><form method="POST" action="{{ url_for("iou.submit") }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">IOU Type <span class="req">*</span></label>
+          <select class="form-select" name="ioutypeid" required>
+            <option value="">Select...</option>
+            {% for t in iou_types %}<option value="{{ t.typeid }}">{{ t.typename }}</option>{% endfor %}
+          </select></div>
+        <div class="form-group"><label class="form-label">Amount <span class="req">*</span></label>
+          <input type="number" class="form-input" name="amount" required step="0.01"></div>
+        <div class="form-group full"><label class="form-label">Reason <span class="req">*</span></label>
+          <textarea class="form-textarea" name="reason" required></textarea></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" onclick="closeModal("iouModal")">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit Request</button></div>
+    </form></div>
+  </div>
+</div>{% endblock %}

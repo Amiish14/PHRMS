@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}My Leave{% endblock %}
+{% block page_title %}My Leave{% endblock %}
+{% block topbar_actions %}<button class="btn btn-sm btn-primary" onclick="openModal('leaveModal')">+ Apply Leave</button>{% endblock %}
+{% block content %}
+<div class="lb-grid">
+  {% for lb in balance %}
+  <div class="lb-card">
+    <div class="lb-type">{{ lb.typename }}</div>
+    <div class="lb-val" style="color:{{ lb.typecolor or 'var(--navy)' }}">{{ lb.available|int }}</div>
+    <div class="lbtl">of {{ lb.allotted }} days</div>
+    <div class="lb-bar"><div class="lb-fill" style="width:{{ ((lb.available/lb.allotted)*100)|round if lb.allotted else 0 }}%;background:{{ lb.typecolor or 'var(--navy)' }}"></div></div>
+  </div>{% endfor %}
+</div>
+<div class="card">
+  <div class="page-tabs" style="margin:0 0 0 18px;padding-top:14px">
+    <a href="?status=" class="page-tab {{ 'active' if not status }}">All</a>
+    <a href="?status=pending" class="page-tab {{ 'active' if status=='pending' }}">Pending</a>
+    <a href="?status=approved" class="page-tab {{ 'active' if status=='approved' }}">Approved</a>
+  </div>
+  <table class="dt"><thead><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th></tr></thead>
+  <tbody>{% for lr in result.rows %}
+    <tr><td>{{ lr.leavetype }}</td>
+      <td class="mono" style="font-size:12px">{{ lr.startdate.strftime('%d %b %Y') if lr.startdate else '—' }}</td>
+      <td class="mono" style="font-size:12px">{{ lr.enddate.strftime('%d %b %Y') if lr.enddate else '—' }}</td>
+      <td class="mono">{{ lr.noofdays|int }}</td>
+      <td style="font-size:12px">{{ lr.reasonforleave[:50] if lr.reasonforleave else '—' }}</td>
+      <td>{% if lr.employeeleaveflag==1 %}<span class="badge bg-green">Approved</span>
+          {% elif lr.employeeleaveflag==2 %}<span class="badge bg-red">Rejected</span>
+          {% else %}<span class="badge bg-amber">Pending</span>{% endif %}</td>
+    </tr>
+  {% else %}<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--g400)">No leave requests</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}
+{% block modals %}
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal"><div class="modal-header"><div class="modal-title">Apply for Leave</div><button class="modal-close" onclick="closeModal('leaveModal')">×</button></div>
+    <div class="modal-body"><form method="POST" action="{{ url_for('employee.apply_leave') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Leave Type <span class="req">*</span></label>
+          <select class="form-select" name="leavetypeid" required><option value="">Select…</option>
+            {% for lt in leave_types %}<option value="{{ lt.typeid }}">{{ lt.typename }}</option>{% endfor %}
+          </select></div>
+        <div class="form-group"><label class="form-label">From <span class="req">*</span></label><input type="date" class="form-input" name="startdate" required></div>
+        <div class="form-group"><label class="form-label">To <span class="req">*</span></label><input type="date" class="form-input" name="enddate" required></div>
+        <div class="form-group full"><label class="form-label">Reason <span class="req">*</span></label><textarea class="form-textarea" name="reason" required></textarea></div>
+        <div class="form-group full"><label class="form-label">Contact During Leave</label><input type="text" class="form-input" name="contact_details"></div>
+      </div>
+      <div class="modal-footer" style="padding:14px 0 0"><button type="button" class="btn btn-ghost" onclick="closeModal('leaveModal')">Cancel</button><button type="submit" class="btn btn-primary">Submit</button></div>
+    </form></div>
+  </div>
+</div>
+{% endblock %}
