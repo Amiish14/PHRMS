@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }} — PHRMS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:#f4f5f7;color:#212529;font-size:14px;line-height:1.6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .err-card{background:#fff;border:1px solid #e9ecef;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.06);max-width:720px;width:100%;overflow:hidden}
+  .err-head{padding:32px 36px 24px;background:linear-gradient(135deg,#fdeaea 0%,#fff 100%);border-bottom:1px solid #f4f5f7}
+  .err-code{font-family:'DM Mono',monospace;font-size:13px;color:#c0392b;font-weight:600;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
+  .err-title{font-size:24px;font-weight:600;color:#1a1a2e;margin-bottom:8px;letter-spacing:-.3px}
+  .err-message{font-size:14px;color:#495057;max-width:540px}
+  .err-body{padding:24px 36px 32px}
+  .err-path{font-family:'DM Mono',monospace;font-size:12px;color:#6c757d;background:#f8f9fa;padding:8px 12px;border-radius:5px;display:inline-block;margin-bottom:18px;word-break:break-all}
+  .err-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;text-decoration:none;transition:all .15s}
+  .btn-primary{background:#c0392b;color:#fff}.btn-primary:hover{background:#922b21}
+  .btn-ghost{background:transparent;color:#495057;border:1px solid #dee2e6}.btn-ghost:hover{background:#f8f9fa}
+  .tb-wrap{margin-top:24px;border-top:1px solid #f4f5f7;padding-top:20px}
+  .tb-label{font-size:11px;font-weight:600;color:#6c757d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .tb-label::before{content:'';width:8px;height:8px;border-radius:50%;background:#e74c3c;display:inline-block}
+  .tb-box{background:#1a1a2e;color:#e9ecef;font-family:'DM Mono',monospace;font-size:11.5px;line-height:1.55;padding:14px 16px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;word-break:break-word;max-height:420px;overflow-y:auto}
+  .tb-box::-webkit-scrollbar{width:8px;height:8px}.tb-box::-webkit-scrollbar-thumb{background:#495057;border-radius:4px}
+  .help-tip{background:#e8f0fe;border:1px solid rgba(21,101,192,.15);border-radius:6px;padding:10px 14px;font-size:12.5px;color:#1565c0;margin-top:14px;line-height:1.55}
+  .footer{padding:14px 36px;background:#f8f9fa;border-top:1px solid #f4f5f7;font-size:11.5px;color:#6c757d;font-family:'DM Mono',monospace;text-align:center}
+</style>
+</head>
+<body>
+<div class="err-card">
+  <div class="err-head">
+    <div class="err-code">Error {{ code }}</div>
+    <h1 class="err-title">{{ title }}</h1>
+    <p class="err-message">{{ message }}</p>
+  </div>
+  <div class="err-body">
+    {% if path %}<div class="err-path">{{ path }}</div>{% endif %}
+    <div class="err-actions">
+      <a href="javascript:history.back()" class="btn btn-ghost">← Go back</a>
+      <a href="/" class="btn btn-primary">Home</a>
+      <a href="/_health" class="btn btn-ghost" target="_blank">System health</a>
+    </div>
+
+    {% if traceback_text %}
+    <div class="tb-wrap">
+      <div class="tb-label">Stack trace — visible to super admin only</div>
+      <div class="tb-box">{{ traceback_text }}</div>
+      <div class="help-tip">
+        <strong>What to do:</strong> Copy this trace and check
+        <a href="/_health" target="_blank" style="color:#1565c0">/_health</a> to confirm
+        DB is reachable. If <code>db.connected</code> is <code>false</code>, the MySQL
+        credentials in Render's env vars are wrong or the DB is paused.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="footer">PHRMS · Procam Group · {{ now.strftime('%d %b %Y %H:%M') }}</div>
+</div>
+</body>
+</html>
