@@ -57,7 +57,7 @@
           {% set _ = att_by_date.update({a.attendancedate.day: a}) %}
         {% endfor %}
 
-        {% import 'calendar_macro.html' as cal_m ignore missing %}
+        
 
         <div class="att-grid">
           {% for dh in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
