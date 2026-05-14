@@ -31,7 +31,8 @@ def dashboard():
         att_summary=att_summary, leave_balance=leave_balance,
         my_leaves=my_leaves['rows'], my_loans=my_loans,
         attendance=attendance, my_claims=my_claims['rows'],
-        leave_types=DB.get_leave_types())
+        leave_types=DB.get_leave_types(),
+        now=datetime.datetime.now())
 
 @employee_bp.route('/profile')
 @login_required

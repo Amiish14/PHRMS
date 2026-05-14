@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from config import config
 import os
+import datetime
 
 mysql = MySQL()
 login_manager = LoginManager()
@@ -19,6 +20,10 @@ def create_app(config_name='default'):
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access PHRMS.'
     login_manager.login_message_category = 'info'
+
+    @app.context_processor
+    def inject_globals():
+        return {'now': datetime.datetime.now(), 'today': datetime.date.today()}
 
     from app.routes.auth import auth_bp
     from app.routes.admin import admin_bp
