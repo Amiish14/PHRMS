@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-{% set now = __import__('datetime').date.today() %}
+
 
 <!-- ATTENDANCE QUICK CARDS -->
 <div class="kpi-grid">
@@ -70,8 +70,7 @@
           <div></div>
           {% endfor %}
 
-          {% set import_calendar = __import__('calendar') %}
-          {% set days_in_month = import_calendar.monthrange(now.year, now.month)[1] %}
+          {% set days_in_month = days_in_month %}
 
           {% for day in range(1, days_in_month + 1) %}
           {% set a = att_by_date.get(day) %}

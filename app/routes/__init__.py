@@ -32,7 +32,8 @@ def dashboard():
         my_leaves=my_leaves['rows'], my_loans=my_loans,
         attendance=attendance, my_claims=my_claims['rows'],
         leave_types=DB.get_leave_types(),
-        now=datetime.datetime.now())
+        now=datetime.datetime.now(),
+        days_in_month=__import__('calendar').monthrange(today.year, today.month)[1])
 
 @employee_bp.route('/profile')
 @login_required
